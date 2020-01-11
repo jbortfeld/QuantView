@@ -3,11 +3,14 @@ import dash_core_components as dcc
 import dash_html_components as html
 
 import pandas as pd
+import math
 from utilities import *
 
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
+
+# slate grey: 3f4d5e
 
 colors = {
     'background': '#0C1B33',
@@ -21,6 +24,17 @@ colors = {
     'title': '#0C1B33',
     'zero_vertical': 'red'
 }
+
+var_names ={'unrate': 'Unemployment Rate',
+            'consumer_conf': 'Consumer Confidence',
+            'business_conf': 'Business Confidence',
+            'ust10yminus2y': 'Slope of the Yield Curve (10Y minus 2Y)',
+            'inflation': 'Inflation',
+            'c0a0': 'IG Spreads',
+            'h0a0': 'HY Spreads',
+            'vix': 'VIX',
+            'gdp_growth_pp_saar': 'GDP Growth'
+            }
 
 xaxis_ticks=[-60,-48,-36,-24,-12,0,12,24,36,48,60]
 
@@ -42,7 +56,7 @@ recessions = recession_start_end_list(df)
 start_dates = [r[0].strftime('%Y-%m') for r in recessions]
 
 
-def build_chart(df, col):
+def build_chart_data(df, col):
     # 2. isolate the variable behavior around each recession
     df = analyze_into_recessions(df, col)
 
@@ -86,106 +100,154 @@ def build_chart(df, col):
 
     return chart_data
 
+def build_row(df, col1, col2):
+
+    '''
+    return a html.Div() that contains two charts in a row. This automates and standardizes
+    the process of adding a row of charts to the html layout of a page
+
+    :param df:
+    :param col1:
+    :param col2:
+    :return: an html.Div() object with a row of two charts
+    '''
+
+    row_list = [
+
+        dcc.Graph(
+            figure={'data': build_chart_data(df, col1),
+
+                 'layout': {'title': {'text': var_names[col1],
+                                      'color': colors['title']},
+                            'font': {'family': 'Courier New, monospace',
+                                     'color': 'white'},
+                            'plot_bgcolor': colors['plot_background'],
+                            'paper_bgcolor': colors['paper_background'],
+                            'xaxis': {'linecolor': colors['axis'],
+                                      'zeroline': True,
+                                      'zerolinecolor': colors['zero_vertical'],
+                                      'tickvals': xaxis_ticks},
+                            'yaxis': {'linecolor': colors['axis'],
+                                      'zeroline': False}}
+                 },
+            style={'width': '50%', 'display': 'inline-block'}),
+    ]
+
+    if col2 != None:
+        row_list.append(
+            dcc.Graph(
+                figure={'data': build_chart_data(df, col2),
+
+                     'layout': {'title': {'text': var_names[col2],
+                                          'color': colors['title']},
+                                'font': {'family': 'Courier New, monospace',
+                                         'color': 'white'},
+                                'plot_bgcolor': colors['plot_background'],
+                                'paper_bgcolor': colors['paper_background'],
+                                'xaxis': {'linecolor': colors['axis'],
+                                          'zeroline': True,
+                                          'zerolinecolor': colors['zero_vertical'],
+                                          'tickvals': xaxis_ticks},
+                                'yaxis': {'linecolor': colors['axis'],
+                                          'zeroline': False},}
+                     },
+            style={'width': '50%', 'display': 'inline-block'})
+
+        )
 
 
+    return html.Div(row_list, className='row')
 
-app.layout = html.Div(style={'backgroundColor': colors['background']},
-                             children=[
 
-    html.H1(children='Quantitative Strategy Applications and Research Group',
+############################################################################################
+# BUILD THE CONTENTS OF THE PAGE
+# construct a list and append new html objects into the list. You can then insert this list
+# into an html.Div() object that defines the page layout
+this_page = [
+
+    # website header
+    html.H3(children='QIS - Quantitative Investment Strategy Applications and Research Group',
             style={'backgroundColor': colors['background'],
                    'color': colors['font']}),
 
-    html.Div(children='''Historical Recession Analysis: Walking into a Downturn''',
-             style={'backgroundColor': colors['background'],
-                    'color': colors['font']}),
+    html.H5(children='A ROI Project - Reproduce, Open-source and Improve Investment Research',
+            style={'backgroundColor': colors['background'],
+                   'color': colors['font']}),
 
-
+    # app description
     html.Div([
 
-        dcc.Graph(
-            figure={'data': build_chart(df, 'unrate'),
+        # left - app description
+        html.Div([
+            html.Div(children='''Historical Downturn Analysis: The Path of a Recession''',
+                     style={'backgroundColor': colors['background'],
+                            'color': '#79C99E', 'font-size': 24}),
 
-                    'layout': {'title': {'text': 'Unemployment Rate',
-                                         'color': colors['title']},
-                               'font': {'family': 'Courier New, monospace',
-                                        'color': 'white'},
-                               'plot_bgcolor': colors['plot_background'],
-                               'paper_bgcolor': colors['paper_background'],
-                               'xaxis': {'linecolor': colors['axis'],
-                                         'zeroline': True,
-                                         'zerolinecolor': colors['zero_vertical'],
-                                         'tickvals': xaxis_ticks},
-                               'yaxis': {'linecolor': colors['axis'],
-                                         'zeroline': False}}
-                    },
-            style={'width': '50%', 'display': 'inline-block'}),
+            html.Div(children='''What does a recession look like? Economic contractions are, thankfully, rare
+                              occurrences but that means we may have a hard time recognizing when we are
+                              heading into or perhaps already in the midst of one. These charts illustrate how economic indicators
+                              behaved in the five years period preceding and trailing the five historical US recessions since 1980.
 
-        dcc.Graph(
-            figure={'data': build_chart(df, 'ust10yminus2y'),
+                              Optionally overlay the current trailing five years of each indicator to compare how
+                              well the current economic environment compares to the archetypal path to recession.
 
-                    'layout': {'title': {'text': 'Slope of Term Structure (10Y minus 2Y)',
-                                         'color': colors['title']},
-                               'font': {'family': 'Courier New, monospace',
-                                        'color': 'white'},
-                               'plot_bgcolor': colors['plot_background'],
-                               'paper_bgcolor': colors['paper_background'],
-                               'xaxis': {'linecolor': colors['axis'],
-                                         'zeroline': True,
-                                         'zerolinecolor': colors['zero_vertical'],
-                                         'tickvals': xaxis_ticks},
-                               'yaxis': {'linecolor': colors['axis'],
-                                         'zeroline': False}}
-                    },
-            style={'width': '50%', 'display': 'inline-block'}),
+                              ''',
+                     style={'width': 600, 'color': '#79C99E'})
+        ], style={'width': '50%', 'display': 'inline-block'}),
 
-    ], className='row'),
+        # right - page description
+        html.Div([
+            html.Div(children='''Data Sourcing''',
+                     style={'backgroundColor': colors['background'],
+                            'color': '#E4BE9E', 'font-size': 24}),
 
-    html.Div([
+            html.Div(children='''All data originates from open source databases and we share both our data
+                              and our code. We share the data, the python code that downloads the data, the code
+                              in jupyter notebooks that analyze the data, and free web apps (like this one!) so
+                              that all people with an interest in the subject matter can engage with the material even
+                              if you don't have a programming background.
 
-        dcc.Graph(
-            figure={'data': build_chart(df, 'consumer_conf'),
+                              ''',
+                     style={'width': 600, 'color': '#E4BE9E'}),
 
-                 'layout': {'title': {'text': 'Consumer Confidence',
-                                      'color': colors['title']},
-                            'font': {'family': 'Courier New, monospace',
-                                     'color': 'white'},
-                            'plot_bgcolor': colors['plot_background'],
-                            'paper_bgcolor': colors['paper_background'],
-                            'xaxis': {'linecolor': colors['axis'],
-                                      'zeroline': True,
-                                      'zerolinecolor': colors['zero_vertical'],
-                                      'tickvals': xaxis_ticks},
-                            'yaxis': {'linecolor': colors['axis'],
-                                      'zeroline': False}}
-                 },
-            style={'width': '50%', 'display': 'inline-block'}),
+            html.Div(children='''DATA UPDATED THROUGH: 2019-12-31
+                              ''',
+                     style={'width': 600, 'color': '#E4BE9E'})
 
-        dcc.Graph(
-            figure={'data': build_chart(df, 'business_conf'),
-
-                 'layout': {'title': {'text': 'Business Confidence',
-                                      'color': colors['title']},
-                            'font': {'family': 'Courier New, monospace',
-                                     'color': 'white'},
-                            'plot_bgcolor': colors['plot_background'],
-                            'paper_bgcolor': colors['paper_background'],
-                            'xaxis': {'linecolor': colors['axis'],
-                                      'zeroline': True,
-                                      'zerolinecolor': colors['zero_vertical'],
-                                      'tickvals': xaxis_ticks},
-                            'yaxis': {'linecolor': colors['axis'],
-                                      'zeroline': False}}
-                 },
-        style={'width': '50%', 'display': 'inline-block'}),
-
-    ], className='row'),
+        ], style={'width': '50%', 'display': 'inline-block'}),
 
 
 
-    ])
+    ], className = 'row')
 
+    ]
 
+############################################################################################
+
+# add content to the page
+# define the variables to display in the app
+vars_to_plot = ['unrate', 'ust10yminus2y',
+                'consumer_conf', 'business_conf',
+                'c0a0', 'h0a0',
+                'gdp_growth_pp_saar']
+
+# if odd number of vars, then add a placeholder (because we want two vars in each row)
+if not len(vars_to_plot) % 2 == 0:
+    vars_to_plot.append(None)
+
+# make a list of lists that give all the rows to make and the two vars that go into each row
+vars_in_rows = []
+for i in range(0,len(vars_to_plot), 2):
+    vars_in_rows.append([vars_to_plot[i], vars_to_plot[i+1]])
+
+for row in vars_in_rows:
+    this_page.append(build_row(df, row[0], row[1]))
+
+############################################################################################
+
+# set the layout of this page
+app.layout = html.Div(style={'backgroundColor': colors['background']},
+                             children=this_page)
 
 
 
