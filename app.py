@@ -33,7 +33,9 @@ var_names ={'unrate': 'Unemployment Rate',
             'c0a0': 'IG Spreads',
             'h0a0': 'HY Spreads',
             'vix': 'VIX',
-            'gdp_growth_pp_saar': 'GDP Growth'
+            'gdp_growth_pp_saar': 'GDP Growth',
+            'ust2y': 'UST 2Y',
+            'ust10y': 'UST 10Y'
             }
 
 xaxis_ticks=[-60,-48,-36,-24,-12,0,12,24,36,48,60]
@@ -170,9 +172,10 @@ this_page = [
             style={'backgroundColor': colors['background'],
                    'color': colors['font']}),
 
-    html.H5(children='A ROI Project - Reproduce, Open-source and Improve Investment Research',
+    html.Div(children='''A ROI Project - Reproduce, Open-source and Improve Investment Research''',
             style={'backgroundColor': colors['background'],
-                   'color': colors['font']}),
+                   'color': colors['font'],
+                   'fontSize': 20}),
 
     # app description
     html.Div([
@@ -229,7 +232,9 @@ this_page = [
 vars_to_plot = ['unrate', 'ust10yminus2y',
                 'consumer_conf', 'business_conf',
                 'c0a0', 'h0a0',
-                'gdp_growth_pp_saar']
+                'gdp_growth_pp_saar', 'vix',
+                'inflation', 'ust2y',
+                'ust10y']
 
 # if odd number of vars, then add a placeholder (because we want two vars in each row)
 if not len(vars_to_plot) % 2 == 0:
