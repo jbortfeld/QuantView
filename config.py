@@ -1,4 +1,10 @@
 
+borders = True
+
+if borders:
+    border = '1px solid red'
+else:
+    border = '0px solid red'
 
 # slate grey: 3f4d5e
 
@@ -16,5 +22,8 @@ colors = {
     'font': '#03B5AA',
     'axis': 'white',
     'title': '#0C1B33',
-    'zero_vertical': 'red'
+    'zero_vertical': 'red',
+    'intro_text': '#79C99E'
 }
+
+
