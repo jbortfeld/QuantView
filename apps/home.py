@@ -32,7 +32,7 @@ def serve_layout():
         dbc.Row(
             [
                 dbc.Col(html.H1("Retirement Planning in Easy Mode",
-                className='display-6',
+                className='display-4',
                 style={'text-align': 'center',
                 'color': '#26BE81',}), width=12),
             ],
