@@ -19,3 +19,4 @@ Werkzeug==1.0.1
 pandas==1.0.3
 numpy==1.18.4
 dash-bootstrap-components==0.10.0
+scipy==1.4.1
