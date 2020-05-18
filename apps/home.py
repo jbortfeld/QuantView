@@ -92,19 +92,19 @@ def serve_layout():
                 dbc.Col(width=1),
 
                 dbc.Col([
-                        dcc.Input(id='my_age_input', value='39', className='input-box'),
+                        dcc.Input(id='my_age_input', value='35', className='input-box'),
                 ], width=2),
 
                 dbc.Col([
-                        dcc.Input(id='retirement_age_input', value='46',className='input-box'),
+                        dcc.Input(id='retirement_age_input', value='50',className='input-box'),
                 ], width=2),
 
                 dbc.Col([
-                    dcc.Input(id='my_wealth_input', value='1100000', className='input-box'),
+                    dcc.Input(id='my_wealth_input', value='600000', className='input-box'),
                 ], width=2),
 
                 dbc.Col([
-                        dcc.Input(id='my_save_input', value='105000', className='input-box'),
+                        dcc.Input(id='my_save_input', value='45000', className='input-box'),
                 ], width=2),
 
                 dbc.Col([
@@ -239,10 +239,8 @@ def display_page(n_clicks,
     user_save,
     user_spend):
 
-    print(n_clicks)
-
-    #if n_clicks is None:
-    if n_clicks == 0:
+    
+    if n_clicks is None:
         return html.Div()
 
     else:
