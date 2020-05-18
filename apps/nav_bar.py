@@ -7,7 +7,7 @@ import dash_html_components as html
 
 nav_bar = [
 
-    html.Div('Home', style={'color': 'lightblue', 'font-size': 20}),
+    dcc.Link('Home', href='/', style={'color': 'lightblue', 'font-size': 20}),
 
     html.Div('About', style={'color': 'lightblue', 'font-size': 20}),
 
@@ -28,8 +28,8 @@ nav_bar = [
 
     html.Div('Apps', style={'color': 'lightblue', 'font-size': 20}),
 
-    html.Div('-- Macro Similarity', style={'color': 'lightblue', 'font-size': 16}),
+    dcc.Link('-- Macro Similarity', href='/markets_in_rear_view', style={'color': 'lightblue', 'font-size': 16}),
 
-    html.Div('-- Recession Analysis', style={'color': 'lightblue', 'font-size': 16}),
+    dcc.Link('-- Recession Analysis', href='/recession_paths', style={'color': 'lightblue', 'font-size': 16}),
 
 ]

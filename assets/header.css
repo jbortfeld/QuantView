@@ -1,0 +1,28 @@
+
+.horizontal-line {
+  color: red;
+  size: 24;
+}
+
+.title {
+  color: orange;
+}
+
+.input-questions {
+	color: #267B83; 
+	font-size: 20px;
+	font-weight: bold;
+	width: 80%;
+	text-align: center;
+}
+
+.input-box {
+	font-size: 48px;
+	height: 100px;
+	text-align: center;
+	width: 80%; 
+}
+
+.green-background {
+	background-color: #26BE81;
+}

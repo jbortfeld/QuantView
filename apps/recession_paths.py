@@ -102,9 +102,9 @@ def build_row(df, col1, col2):
                 figure={'data': build_chart_data(df, col1),
 
                      'layout': {'title': {'text': var_names[col1],
-                                          'color': config.colors['title']},
+                                          'color': config.colors['chart_title']},
                                 'font': {'family': 'Courier New, monospace',
-                                         'color': 'white'},
+                                         'color': config.colors['axis_label']},
                                 'plot_bgcolor': config.colors['plot_background'],
                                 'paper_bgcolor': config.colors['paper_background'],
                                 'xaxis': {'linecolor': config.colors['axis'],
@@ -124,9 +124,9 @@ def build_row(df, col1, col2):
                 figure={'data': build_chart_data(df, col2),
 
                      'layout': {'title': {'text': var_names[col2],
-                                          'color': config.colors['title']},
+                                          'color': config.colors['chart_title']},
                                 'font': {'family': 'Courier New, monospace',
-                                         'color': 'white'},
+                                         'color': config.colors['axis_label']},
                                 'plot_bgcolor': config.colors['plot_background'],
                                 'paper_bgcolor': config.colors['paper_background'],
                                 'xaxis': {'linecolor': config.colors['axis'],
@@ -175,12 +175,15 @@ this_page_content = [
 
                                   ''',
                          style={'font-size': 20})
-            ], style={'color': '#79C99E', 'width': '50%', 'display': 'inline-block','color': '#79C99E', 'vertical-align': 'top' }),
+            ], style={'color': config.colors['discussion_text'],
+                      'width': '50%',
+                      'display': 'inline-block',
+                      'vertical-align': 'top' }),
 
             # right - page description
             html.Div([
                 html.Div(children='''Data Sourcing''',
-                         style={'font-size': 24, 'color': '#E4BE9E'}),
+                         style={'font-size': 24, 'color': config.colors['discussion_text_2']}),
 
                 html.Div(children='''All data originates from open source databases and we share both our data
                                   and our code. We share the data, the python code that downloads the data, the code
@@ -189,7 +192,7 @@ this_page_content = [
                                   if you don't have a programming background.
 
                                   ''',
-                         style={'width': 600, 'color': '#E4BE9E'}),
+                         style={'width': 600, 'color': config.colors['discussion_text_2']}),
 
                 html.Div(children='''DATA UPDATED THROUGH: 2019-12-31
                                   ''',
@@ -233,9 +236,17 @@ this_page = [
              ], className = 'row')
 ]
 
-layout = html.Div(style={'backgroundColor': config.colors['background'],
-                         'border': '1px solid red',
+def serve_layout():
+
+    return [html.Div(style={'backgroundColor': config.colors['background'],
+                         'border': config.border,
                                   },
-                  children=this_page)
+                  children=this_page)]
+
+
+layout = serve_layout
+
+
+
 
 
