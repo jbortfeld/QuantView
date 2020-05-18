@@ -10,6 +10,7 @@ from utilities import *
 
 import config
 from app import app
+from app import server
 from apps import nav_bar
 from apps import home
 
