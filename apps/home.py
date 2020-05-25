@@ -13,6 +13,7 @@ import scipy.stats
 from utilities import *
 import config
 from app import app
+from apps import functions
 
 # source data for actuarial calculations
 # https://www.ssa.gov/oact/STATS/table4c6.html#fn2
@@ -31,20 +32,16 @@ def serve_layout():
 
         dbc.Row(
             [
-                dbc.Col(html.H1("Retirement Planning in Easy Mode",
-                className='display-4',
-                style={'text-align': 'center',
-                'color': '#26BE81',}), width=12),
+                dbc.Col(
+                    html.H1("Retirement Planning in Easy Mode", className='display-4 app-header')
+                )
             ],
-            align="center",
-            no_gutters=True,
         ),
 
         html.Br(),
 
         html.Div('''Planning your finances can be complicated. Here are five questions that
-        that can help you build a rough, but fast, roadmap for your future.''', style={'text-align': 'center',
-        'color': 'grey'}),
+        that can help you build a rough, but fast, roadmap for your future.''', className='text-note'),
 
         html.Br(),
 
@@ -56,27 +53,24 @@ def serve_layout():
                 dbc.Col(width=1),
 
                 dbc.Col(
-                html.Div('How Old Are You Now?', className='input-questions')
+                    html.Div('How Old Are You Now?', className='input-questions')
                , width=2),
 
                 dbc.Col(
-                html.Div('At What Age Do You Want to Retire?', className='input-questions')
+                    html.Div('At What Age Do You Want to Retire?', className='input-questions')
                 , width=2),
 
                 dbc.Col(
-                html.Div([
-                html.Div('How Much Have You Currently Saved?', className='input-questions'),
-                ],  style={'text-align': 'center', 'font-size': '48px', 'color': 'green'}), width=2),
+                    html.Div('How Much Have You Currently Saved?', className='input-questions')
+                , width=2),
 
                 dbc.Col(
-                html.Div([
-                html.Div('How Much Do You Save a Year?', className='input-questions'),
-                ],  style={'text-align': 'center', 'font-size': '48px', 'color': 'green'}), width=2),
+                    html.Div('How Much Do You Save a Year?', className='input-questions')
+                , width=2),
 
                 dbc.Col(
-                html.Div([
-                html.Div('How Much Will You Spend Per Year in Retirement?', className='input-questions'),
-                ],  style={'text-align': 'center', 'font-size': '48px', 'color': 'green'}), width=2),
+                    html.Div('How Much Will You Spend Per Year in Retirement?', className='input-questions')
+                , width=2),
 
                 dbc.Col(width=1),
 
@@ -131,6 +125,9 @@ def serve_layout():
         html.Br(),
         html.Br(),
         html.Br(),
+        html.Br(),
+        html.Br(),
+
 
         html.Div(id='output'),
         ], className='body')
@@ -139,77 +136,6 @@ def serve_layout():
 
     ]
 
-
-def calc_wealth_trajectory(starting_wealth, returns, contribution, add_first_obs_as_starting_wealth = True):
-    
-    # get the number of periods to simulate, based on the length of the returns simulation
-    num_simulations = returns.shape[0]
-    num_periods = returns.shape[1]
-
-    # init an array that is the same shape as the inputted return
-    # (this will be a [num_simulations x num_periods]-sized array)
-    wealths = np.zeros_like(returns)
-    
-    # for every simulation, iterate through each period and update the wealth based on the prior period
-    # wealth, the return in the given period and the contribution in that period
-    current_wealths = np.copy(starting_wealth)
-    
-    if num_periods > 0:
-        for i in range(num_periods):
-            current_wealths = current_wealths.flatten() * (1 + returns[:,i]).flatten() + contribution
-            wealths[:,i] = current_wealths
-            
-    if add_first_obs_as_starting_wealth:
-        starts = np.full(shape=(num_simulations, 1), fill_value=starting_wealth)
-        wealths = np.concatenate([starts, wealths], axis=1)
-    
-    return wealths
-
-def random_walk_simulations(mean, stdev, periods, num_simulations):
-
-    # draw random numbers from a normal distribution with specified mean and standard deviation
-    # the result is an [num_simulations x periods] array of simulated returns
-    random_returns = np.random.normal(mean, stdev, size=[num_simulations,periods])
-    
-    # convert to returns that can be cumulatively multiplied
-    # for example, a 3.4% return is now 1.034
-    cum_returns = random_returns.copy()
-    cum_returns += 1
-    
-    # calculate the cumulative product
-    cum_returns = np.cumprod(cum_returns, axis=1)
-
-    return random_returns, cum_returns
-
-
-def wealth_distributions(x):
-    '''
-    calculate the distribution statistics for a set of wealth trajectories over time. 
-    for each period, calculate the mean, median, 25th, 10th, 5th and 1st percentiles of wealth across
-    the simulated wealth trajectories
-     
-     
-    let the input x be an array of size [num_simulations x num_periods].
-    :return: a dictionary of arrays. For example, given an input array x that represents 
-    m simulations with each simulation covering n periods, the 'means' key in the dictionary will return 
-    an array of n elements, representing the n periods, and the ith element represents the 
-    mean across the m simulations for the ith period. 
-    '''
-        
-    means = np.mean(x, axis=0)
-    medians = np.median(x, axis=0)
-    p25 = np.percentile(x, 25, axis=0)
-    p10 = np.percentile(x, 10, axis=0)
-    p5 = np.percentile(x, 5, axis=0)
-    p1 = np.percentile(x, 1, axis=0)
-
-    return {'mean': means, 
-           'median': medians,
-           'pct25': p25,
-            'pct10': p10,
-            'pct5': p5,
-            'pct1': p1
-           }
 
 
 layout = serve_layout
@@ -252,10 +178,11 @@ def display_page(n_clicks,
         user_save = int(user_save)
         user_spend=int(user_spend)
 
-        years_to_retire = user_retirement_age - user_age
-        years_in_retirement = 105 - user_retirement_age
+        num_simulations = 10000
+
+        years_to_retire = user_retirement_age - user_age 
+        years_to_retire_plus_one = years_to_retire + 1 # because we want to include the current age
         current_year = datetime.datetime.now().year
-        years_to_105 = 105-user_age + 1
 
 
         # expected age at death based on mortality tables
@@ -277,56 +204,100 @@ def display_page(n_clicks,
         age_list = this_mortality_df.index.tolist()
         cum_survival_prob_list = this_mortality_df['cum_survival_prob'].tolist()
 
-        def calc_age_for_survival_prob(target_survival_prob, age_list, cum_survival_prob_list):
-            for i in range(len(age_list)):
-                if cum_survival_prob_list[i] <= target_survival_prob:
-                    return age_list[i]
-            return 999
 
-        age_at_25_pct_survival_prob = calc_age_for_survival_prob(0.25, age_list, cum_survival_prob_list)
-        age_at_10_pct_survival_prob = calc_age_for_survival_prob(0.10, age_list, cum_survival_prob_list)
-        age_at_5_pct_survival_prob = calc_age_for_survival_prob(0.05, age_list, cum_survival_prob_list)
-        age_at_1_pct_survival_prob = calc_age_for_survival_prob(0.01, age_list, cum_survival_prob_list)
+        age_at_25_pct_survival_prob = functions.calc_age_for_survival_prob(0.25, age_list, cum_survival_prob_list)
+        age_at_10_pct_survival_prob = functions.calc_age_for_survival_prob(0.10, age_list, cum_survival_prob_list)
+        age_at_5_pct_survival_prob = functions.calc_age_for_survival_prob(0.05, age_list, cum_survival_prob_list)
+        age_at_1_pct_survival_prob = functions.calc_age_for_survival_prob(0.01, age_list, cum_survival_prob_list)
+
         years_to_1_pct_survival_prob = age_at_1_pct_survival_prob - user_age
         years_in_retirement = age_at_1_pct_survival_prob - user_retirement_age + 1
+        num_periods = age_at_1_pct_survival_prob - user_age + 1
 
         # init a dataframe with ages and calendar years in the rows
         # the ages range from the current user age to the age that the user has a 1% probability of reaching
         # (for example, a 40 year old today might have a 1% chance of living to 100 so let's have the
-        # chart x-axis show values from age 39 to age 100)
+        # chart x-axis show values from age 39 to age 100, inclusive)
         df = pd.DataFrame({'age': list(range(user_age, age_at_1_pct_survival_prob + 1))})
         df['year'] = list(range(current_year, current_year + years_to_1_pct_survival_prob + 1))
+        assert df.shape[0] == num_periods, 'error'
 
-        # generate random market returns
-        return_simulations, cum_return_simulations = random_walk_simulations(0.04, 0.14, years_to_1_pct_survival_prob, 10000)
+
+
+        # simulate market returns based on a random walk
+        equity_return_sim1 = functions.random_walk_simulations(mean=0.06, 
+            stdev=0.14, 
+            periods=num_periods, 
+            num_simulations=num_simulations)
+
+        bond_return_sim1 = np.full_like(equity_return_sim1, fill_value=0.01)
+        bond_return_sim1[:,0] = 0.0
         
+        
+        # get historical annual returns to use in sampling
+        years, sp500, ust_3m, ust, bbb = functions.get_historical_annual_returns()
+        num_historical_samples = len(years)
+
+        # simulate market returns based on continuous historical sampling
+        _, equity_return_sim2, bond_return_sim2 = functions.build_continuous_sampled_returns(num_periods_per_simulation=num_periods, 
+            num_simulations=num_simulations, 
+            year_list=years, 
+            sp500_list=sp500, 
+            ust_list=ust)
+
+
+        # simulate market returns based on discontinuous historical sampling    
+        _,equity_return_sim3, bond_return_sim3 = functions.build_discontinuous_sampled_returns(num_periods_per_simulation=num_periods, 
+        sub_sample_length= 5, 
+        num_simulations=num_simulations, 
+        year_list=years, 
+        sp500_list=sp500, 
+        ust_list=ust)
+
+        equity_returns = np.concatenate([equity_return_sim1, equity_return_sim2, equity_return_sim2], axis=0)
+        bond_returns = np.concatenate([bond_return_sim1, bond_return_sim2, bond_return_sim2], axis=0)
+
+        # calculate asset allocation between equity and bonds in each period
+        allocations = functions.calc_asset_allocations(user_age=user_age, 
+                                           retirement_age=user_retirement_age, 
+                                           final_age=age_at_1_pct_survival_prob, 
+                                           percent_at_retirement=0.6, 
+                                           glide_length=10)
+
+        # make an array of allocations for every simulation
+        allocations = np.array([allocations for i in range(num_simulations)])
+
+
         # calc wealth during savings phase
         # init an [num_simulations x 1]-sized array with the starting wealth 
-        starting_wealth_array = np.full(shape=(return_simulations.shape[0], 1), 
+        starting_wealth_array = np.full(shape=equity_returns.shape[0], 
             fill_value=user_wealth)
 
         # calculate the growth of wealth given market returns and contributions during the savings phase
-        wealths1 = calc_wealth_trajectory(starting_wealth=starting_wealth_array,
-            returns=return_simulations[:,:years_to_retire],
+        wealths1 = functions.calc_wealth_trajectory(starting_wealth=starting_wealth_array,
+            returns=equity_returns[:,:years_to_retire],
             contribution=user_save,
-            add_first_obs_as_starting_wealth=True)
+            include_contribution_for_first_obs=False)
 
         # get the final wealth values (as array) at the end of the last year of the savings phase
         # (the wealth at the start of retiremente)
         wealth_at_retirement = wealths1[:,-1]
 
         # calc wealth during retirement phase
-        wealths2 = calc_wealth_trajectory(starting_wealth=wealth_at_retirement,
-            returns=return_simulations[:, years_to_retire:],
-            contribution=-user_spend,
-            add_first_obs_as_starting_wealth=False)
+        wealths2 = functions.calc_wealth_trajectory(starting_wealth=wealth_at_retirement,
+            returns=equity_returns[:, years_to_retire:],
+            contribution=-user_spend)
 
         wealths3 = np.concatenate([wealths1, wealths2], axis=1)
-        trajectories = wealth_distributions(wealths3)
-        mean_trajectory = trajectories['median']
+
+        # calculate the different wealth trajectories
+        # (eg the median path, 25th percentile path, etc)
+        trajectories = functions.wealth_distributions(wealths3)
+        median_trajectory = trajectories['median']
+        pct5_trajectory = trajectories['pct5']       
 
 
-        df['wealth'] = mean_trajectory
+        df['median_wealth'] = median_trajectory
         
         # make a chart with wealth over time
         
@@ -334,14 +305,15 @@ def display_page(n_clicks,
         # the bars that represent wealth during the savings phase should be green
         # and the bars during the retirement phase are blue
         #bar_colors = ['#26BE81'] * (years_to_retire)
-        bar_colors = ['#7971ea'] * (years_to_retire)
+        bar_colors = ['#26BE81'] * (years_to_retire)
+        bar_colors = bar_colors + ['green']
         #bar_colors = bar_colors + ['#2663be'] * (years_in_retirement + 1)
         bar_colors = bar_colors + ['#f8615a'] * (years_in_retirement + 1)
 
         # make chart
         data = [
             {'x': df['age'],
-            'y': df['wealth'],
+            'y': df['median_wealth'],
             'type': 'bar',
             'marker': {'color': bar_colors}},
         ]
@@ -475,6 +447,11 @@ def display_page(n_clicks,
             ),
 
             html.Br(),
+            html.Br(),
+            html.Br(),
+            html.Br(),
+            html.Br(),
+            html.Br(),
 
             # second result section
             html.Div([
@@ -484,7 +461,8 @@ def display_page(n_clicks,
 
                         html.Div([
 
-                            html.H1("In 2024, as your target retirement age of 46:", className='display-6', 
+                            html.H1("In {}, at your target retirement age of {}:".format(current_year + years_to_retire,
+                             user_retirement_age), className='display-6', 
                                 style={'text-align': 'center','color': 'white',}),
 
                         ])
@@ -493,13 +471,19 @@ def display_page(n_clicks,
 
                 ], align="center", no_gutters=True),
 
+                html.Br(),
+                html.Br(),
+                html.Br(),
+                html.Br(),
+
+
 
                 dbc.Row([
                     dbc.Col(
 
                         html.Div([
 
-                            html.H1("hello my world", className='display-6', 
+                            html.H1("", className='display-6', 
                                 style={'text-align': 'center','color': 'white',}),
 
                         ])
@@ -525,7 +509,7 @@ def display_page(n_clicks,
 
                         html.Div([
 
-                            html.H1("hello my world", className='display-6', 
+                            html.H1("", className='display-6', 
                                 style={'text-align': 'center','color': 'white',}),
 
                         ])
@@ -535,7 +519,7 @@ def display_page(n_clicks,
 
                         html.Div([
 
-                            html.H3("This is based on average market returns of 6% per year", className='display-6', 
+                            html.H3("We simulated 30,000 market scenarios to identify the worst-case scenarios", className='display-6', 
                                 style={'text-align': 'center','color': 'white',}),
 
                         ])
@@ -551,7 +535,7 @@ def display_page(n_clicks,
 
                         html.Div([
 
-                            html.H1("hello my world", className='display-6', 
+                            html.H1("", className='display-6', 
                                 style={'text-align': 'center','color': 'white',}),
 
                         ])

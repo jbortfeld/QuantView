@@ -1,11 +1,10 @@
 
-.horizontal-line {
-  color: red;
-  size: 24;
+.body {
+	text-align: center;
 }
 
-.title {
-  color: orange;
+.app-header {
+	color: #26BE81;
 }
 
 .input-questions {
@@ -25,4 +24,8 @@
 
 .green-background {
 	background-color: #26BE81;
+}
+
+.text-note {
+	color: grey;
 }
