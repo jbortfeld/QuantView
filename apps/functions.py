@@ -8,10 +8,14 @@ def calc_age_for_survival_prob(target_survival_prob, age_list, cum_survival_prob
                     return age_list[i]
             return 999
 
-def calc_wealth_trajectory(starting_wealth, equity_returns, bond_returns, allocations, contribution, include_contribution_for_first_obs=True):
+def calc_wealth_trajectory(starting_wealth, equity_returns, bond_returns, allocations, contributions):
     
+    print(equity_returns.shape, allocations.shape)
+
     assert equity_returns.shape == allocations.shape, 'error: equity returns and allocations are not the same shape'
     assert equity_returns.shape == bond_returns.shape, 'error: equity returns and bond returns are not the same shape'
+    assert equity_returns.shape == contributions.shape, 'error: equity returns and contributions are not the same shape'
+
 
 
 
@@ -37,16 +41,37 @@ def calc_wealth_trajectory(starting_wealth, equity_returns, bond_returns, alloca
         # the returns are calculated as asset return times allocation to that asset
         equity_return_i = (1 + equity_returns[:,i]).flatten() * allocations[:,i].flatten()
         bond_return_i = (1 + bond_returns[:,i]).flatten() *  (1.0 - allocations[:,i].flatten())
+        contribution_i = contributions[:,i].flatten()
 
         current_wealths = ((current_wealths.flatten() * equity_return_i) + 
-            (current_wealths.flatten() * bond_return_i))
-
-        if (i > 0 ) or (include_contribution_for_first_obs == True):
-            current_wealths += contribution 
+            (current_wealths.flatten() * bond_return_i) +
+            contribution_i)
 
         wealths[:,i] = current_wealths
     
     return wealths
+
+def calc_contributions(user_age, retirement_age, final_age, user_save, user_spend):
+
+    ''' 
+    make an array that contains the contribution (or spend) for every period. 
+    '''
+
+    num_periods = final_age - user_age + 1
+    age_list = list(range(user_age, final_age + 1))
+    contributions = np.array([0] * num_periods)
+
+    for i in range(num_periods):
+
+        if age_list[i] < retirement_age:
+            contributions[i] = user_save
+        else:
+            contributions[i] = -user_spend
+
+    # set first period (current user age) to zero
+    contributions[0] = 0
+
+    return contributions
 
 def calc_asset_allocations(user_age, retirement_age, final_age, percent_at_retirement, glide_length):
 

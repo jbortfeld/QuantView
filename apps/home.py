@@ -264,8 +264,16 @@ def display_page(n_clicks,
                                            percent_at_retirement=0.6, 
                                            glide_length=10)
 
+        contributions = functions.calc_contributions(user_age=user_age,
+                                     retirement_age=user_retirement_age,
+                                     final_age=age_at_1_pct_survival_prob,
+                                     user_save=user_save,
+                                     user_spend=user_spend)
+
+
         # make an array of allocations for every simulation
-        allocations = np.array([allocations for i in range(num_simulations)])
+        allocations = np.array([allocations for i in range(num_simulations * 3)])
+        contributions=np.array([contributions for i in range(num_simulations * 3)])
 
 
         # calc wealth during savings phase
@@ -274,28 +282,21 @@ def display_page(n_clicks,
             fill_value=user_wealth)
 
         # calculate the growth of wealth given market returns and contributions during the savings phase
-        wealths1 = functions.calc_wealth_trajectory(starting_wealth=starting_wealth_array,
-            returns=equity_returns[:,:years_to_retire],
-            contribution=user_save,
-            include_contribution_for_first_obs=False)
+        wealths = functions.calc_wealth_trajectory(starting_wealth=starting_wealth_array,
+            equity_returns=equity_returns,
+            bond_returns=bond_returns,
+            allocations=allocations,
+            contributions=contributions)
 
         # get the final wealth values (as array) at the end of the last year of the savings phase
         # (the wealth at the start of retiremente)
-        wealth_at_retirement = wealths1[:,-1]
-
-        # calc wealth during retirement phase
-        wealths2 = functions.calc_wealth_trajectory(starting_wealth=wealth_at_retirement,
-            returns=equity_returns[:, years_to_retire:],
-            contribution=-user_spend)
-
-        wealths3 = np.concatenate([wealths1, wealths2], axis=1)
+        wealth_at_retirement = wealths[:,years_to_retire_plus_one]
 
         # calculate the different wealth trajectories
         # (eg the median path, 25th percentile path, etc)
-        trajectories = functions.wealth_distributions(wealths3)
+        trajectories = functions.wealth_distributions(wealths)
         median_trajectory = trajectories['median']
         pct5_trajectory = trajectories['pct5']       
-
 
         df['median_wealth'] = median_trajectory
         
