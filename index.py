@@ -102,6 +102,7 @@ def display_page(pathname):
 # Be *very* careful here - you don't want to serve arbitrary files
 # from your computer or server
 image_directory = '/Users/education/Desktop'
+image_directory = 'images/'
 static_image_route = '/'
 @app.server.route('{}<image_path>.png'.format(static_image_route))
 def serve_image(image_path):
