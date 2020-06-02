@@ -54,7 +54,11 @@ def calc_wealth_trajectory(starting_wealth, equity_returns, bond_returns, alloca
     return wealths
 
 
-def calc_contributions(user_age, retirement_age, final_age, user_save, user_spend):
+def calc_geometric_rate_of_return(start_value, end_value, num_periods):
+    return ((end_value / start_value) ** (1 / num_periods)) - 1.0
+
+
+def calc_contributions(user_age, retirement_age, final_age, user_save, user_spend, user_social_security_age, user_social_security_benefit):
     ''' 
     make an array that contains the contribution (or spend) for every period. 
     '''
@@ -69,6 +73,10 @@ def calc_contributions(user_age, retirement_age, final_age, user_save, user_spen
             contributions[i] = user_save
         else:
             contributions[i] = -user_spend
+
+        if age_list[i] >= user_social_security_age:
+            contributions[i] += user_social_security_benefit
+
 
     # set first period (current user age) to zero
     contributions[0] = 0
@@ -182,19 +190,24 @@ def wealth_distributions(x):
             1: p1
             }
 
+
 def convert_dollar_number_to_text(x):
     if x > 1000000:
-        text = round((x / 1000000),2)
+        text = round((x / 1000000), 2)
         if text.is_integer():
             text = int(text)
         text = '${}M'.format(text)
     else:
-        text = round((x / 1000),2)
+        text = round((x / 1000), 2)
         if text.is_integer():
             text = int(text)
         text = '${}K'.format(text)
 
     return text
+
+def convert_percent_to_text(x):
+    return str(round(x*100,2)) + '%'
+
 
 def get_historical_annual_returns():
 

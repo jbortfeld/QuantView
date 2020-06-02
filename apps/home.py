@@ -41,8 +41,24 @@ def serve_layout():
 
                 html.Br(),
 
-                html.Div('''Planning your finances can be complicated. Here are five questions that
-        that can help you build a rough, but fast, roadmap for your future.''', className='text-note'),
+                dbc.Row([
+
+                    dbc.Col('', width=1),
+
+                    dbc.Col(  
+                        html.Img(src='questionnaire.png', style={'height': '150px'})
+                    , width=2),
+
+                    dbc.Col(
+                        html.Div('''Planning your finances can be complicated. Here are five questions that
+                                    that can help you build a rough, but fast, roadmap for your future.''', className='text-note', style={'text-align': 'left'})
+                    , width=8),
+
+                    dbc.Col('', width=1),
+
+
+
+                ], no_gutters=True, align='center'),
 
                 html.Br(),
 
@@ -88,11 +104,11 @@ def serve_layout():
 
                         dbc.Col([
                             dcc.Input(id='retirement_age_input',
-                                      value='50', className='input-box'),
+                                      value='55', className='input-box'),
                         ], width=2),
 
                         dbc.Col([
-                            dcc.Input(id='my_wealth_input', value='$600,000',
+                            dcc.Input(id='my_wealth_input', value='$500,000',
                                       className='input-box'),
                         ], width=2),
 
@@ -102,7 +118,7 @@ def serve_layout():
                         ], width=2),
 
                         dbc.Col([
-                            dcc.Input(id='my_spend_input', value='$70,000',
+                            dcc.Input(id='my_spend_input', value='$50,000',
                                       className='input-box'),
                         ], width=2),
 
@@ -171,15 +187,19 @@ def display_page(n_clicks,
         # derive extra parameters for modelling wealth trajectory
         user_age = int(user_age)
         user_retirement_age = int(user_retirement_age)
-        user_wealth = int(user_wealth.replace(',','').replace('$',''))
-        user_save = int(user_save.replace(',','').replace('$',''))
-        user_spend = int(user_spend.replace(',','').replace('$',''))
+        user_wealth = int(user_wealth.replace(',', '').replace('$', ''))
+        user_save = int(user_save.replace(',', '').replace('$', ''))
+        user_spend = int(user_spend.replace(',', '').replace('$', ''))
+
+        user_social_security_age = 70
+        user_social_security_benefit = 24000
 
         num_simulations = 10000
 
         years_to_retire = user_retirement_age - user_age
         # because we want to include the current age
         years_to_retire_plus_one = years_to_retire + 1
+        years_to_retire_minus_one = years_to_retire - 1
         current_year = datetime.datetime.now().year
 
         # expected age at death based on mortality tables
@@ -229,7 +249,7 @@ def display_page(n_clicks,
         assert df.shape[0] == num_periods, 'error'
 
         # simulate market returns based on a random walk
-        equity_return_sim1 = functions.random_walk_simulations(mean=0.06,
+        equity_return_sim1 = functions.random_walk_simulations(mean=0.03,
                                                                stdev=0.14,
                                                                periods=num_periods,
                                                                num_simulations=num_simulations)
@@ -261,7 +281,13 @@ def display_page(n_clicks,
         bond_returns = np.concatenate(
             [bond_return_sim1, bond_return_sim2, bond_return_sim2], axis=0)
 
-        print(equity_returns[0])
+        equity_returns = equity_return_sim1
+        bond_returns = bond_return_sim1
+
+        rates_of_return = equity_returns[:, 1:]
+        rates_of_return = rates_of_return + 1
+        rates_of_return = np.cumprod(rates_of_return, axis=1)
+        rates_of_return = functions.wealth_distributions(rates_of_return)
 
         # calculate asset allocation between equity and bonds in each period
         allocations = functions.calc_asset_allocations(user_age=user_age,
@@ -274,16 +300,19 @@ def display_page(n_clicks,
                                                      retirement_age=user_retirement_age,
                                                      final_age=age_at_1_pct_survival_prob,
                                                      user_save=user_save,
-                                                     user_spend=user_spend)
+                                                     user_spend=user_spend,
+                                                     user_social_security_age=user_social_security_age,
+                                                     user_social_security_benefit=user_social_security_benefit)
 
-        total_user_save = contributions[:user_retirement_age-user_age].sum()
-        total_user_save = functions.convert_dollar_number_to_text(total_user_save)
+        total_user_save = contributions[:user_retirement_age - user_age].sum()
+        total_user_save = functions.convert_dollar_number_to_text(
+            total_user_save)
 
         # make an array of allocations for every simulation
         allocations = np.array(
-            [allocations for i in range(num_simulations * 3)])
+            [allocations for i in range(num_simulations)])
         contributions = np.array(
-            [contributions for i in range(num_simulations * 3)])
+            [contributions for i in range(num_simulations)])
 
         # calc wealth during savings phase
         # init an [num_simulations x 1]-sized array with the starting wealth
@@ -312,13 +341,56 @@ def display_page(n_clicks,
         # calculate wealth distribution statistics at retirement
         retirement_wealths = {}
         retirement_wealths_text = {}
+        retirement_rate_of_return = {}
+        retirement_rate_of_return_text = {}
+        retirement_forever_income_text = {}
         idx_at_retirement = user_retirement_age - user_age
 
         # get the retirement wealth distribution at retirement age
-        for i in [75,50,25,5, 1]:
-            retirement_wealths[i] =trajectories[i][idx_at_retirement]
-            retirement_wealths_text[i] = functions.convert_dollar_number_to_text(retirement_wealths[i])
+        for i in [75, 50, 25, 5, 1]:
 
+            # get the $ value of weath for the given percentile (eg 1200000)
+            retirement_wealths[i] = trajectories[i][idx_at_retirement]
+
+            # get the $ value of wealth for the given percentile as a formatted string (eg $1.2M)
+            retirement_wealths_text[i] = functions.convert_dollar_number_to_text(
+                retirement_wealths[i])
+
+            # get the average rate of return of the stock market for the given percentile
+            retirement_rate_of_return[i] = functions.calc_geometric_rate_of_return(start_value=1,
+                                                                                   end_value=rates_of_return[i][
+                                                                                       idx_at_retirement - 1],
+                                                                                   num_periods=years_to_retire_minus_one)
+
+            # get the average rate of return of the stock market as a formatted string
+            retirement_rate_of_return_text[i] = functions.convert_percent_to_text(retirement_rate_of_return[i])
+
+
+            retirement_forever_income_text[i] = functions.convert_dollar_number_to_text(retirement_wealths[i] * 0.04)
+
+        retirement_df=pd.DataFrame({
+                    'Scenario': ['Optimistic (75th percentile)',
+                                 'Expected (50th pct)',
+                                 'Possible (25th pct)',
+                                 'Pessimistic (5th pct'],
+                    '$ at Retirement': [retirement_wealths_text[75],
+                                        retirement_wealths_text[50],
+                                        retirement_wealths_text[25],
+                                        retirement_wealths_text[5]],
+                    'Stock Market Avg Return': [retirement_rate_of_return_text[75],
+                                                     retirement_rate_of_return_text[
+                                                         50],
+                                                     retirement_rate_of_return_text[
+                                                         25],
+                                                     retirement_rate_of_return_text[5]],
+                    '"Forever Income"': [retirement_forever_income_text[75],
+                                        retirement_forever_income_text[50],
+                                        retirement_forever_income_text[25],
+                                        retirement_forever_income_text[5]],
+
+
+
+                })
 
         # make a chart with wealth over time
 
@@ -328,7 +400,8 @@ def display_page(n_clicks,
         bar_colors = ['#26BE81'] * (years_to_retire)
         bar_colors = bar_colors + ['green']
         # bar_colors = bar_colors + ['#2663be'] * (years_in_retirement + 1)
-        bar_colors = bar_colors + ['#f8615a'] * (years_in_retirement + 1)
+        # bar_colors = bar_colors + ['#f8615a'] * (years_in_retirement + 1)
+        bar_colors = bar_colors + ['red'] * (years_in_retirement + 1)
 
         # make chart
         data = [
@@ -339,6 +412,18 @@ def display_page(n_clicks,
         ]
 
         chart_lines = [
+
+            # veritcal line when user starts to take social security
+            {
+                'x0': user_social_security_age,
+                'y0': 0,
+                'x1': user_social_security_age,
+                'y1': 1,
+                'yref': 'paper',
+                'type': 'line',
+                'line': {'color': 'purple', 'width': 5, 'dash': 'dot'}
+            },
+
 
             # vertical line at expected age at death (50% survival probability)
             {
@@ -384,6 +469,20 @@ def display_page(n_clicks,
         ]
 
         chart_annotations = [
+            {'x': user_retirement_age,
+             'y': -0.2,
+             'yref': 'paper',
+             'text': 'Retirement',
+             'showarrow': False,
+             'font': {'color': 'green', 'family': 'avenir', 'size': 12}},
+
+            {'x': user_social_security_age,
+             'y': -0.2,
+             'yref': 'paper',
+             'text': 'Social Security',
+             'showarrow': False,
+             'font': {'color': 'purple', 'family': 'avenir', 'size': 12}},
+
             {'x': expected_age_at_death,
              'y': -0.2,
              'yref': 'paper',
@@ -422,10 +521,10 @@ def display_page(n_clicks,
 
         ]
 
-        layout = {'title': 'Your Expected Wealth Over Time',
+        layout = {'title': '<b>Your Expected Wealth Over Time</b>',
                   'annotations': chart_annotations,
-                  'height': 300,
-                  'margin': {'t': 30},
+                  'height': 350,
+                  'margin': {'t': 40, 'r': 10},
                   'shapes': chart_lines,
                   }
 
@@ -493,132 +592,59 @@ def display_page(n_clicks,
 
                     dbc.Col(
                         html.Div([
-                            html.Img(src='money.png', style={'height':'150px'}),
+                            html.Img(src='money.png', style={
+                                     'height': '150px'}),
                             html.Br(),
                             html.Br(),
                             html.H4('''You'll have contributed an additional {} to savings over the next {} years'''.format(total_user_save,
-                                user_retirement_age-user_age-1))
-                        ])
-                        , width=6, style={'padding-left': '10%', 'padding-right': '10%'}),
+                                                                                                                            user_retirement_age - user_age - 1))
+                        ]), width=6, style={'padding-left': '10%', 'padding-right': '10%'}),
 
                     dbc.Col(
                         html.Div([
-                            html.Img(src='stock-market.png', style={'height':'150px'}),
+                            html.Img(src='stock-market.png',
+                                     style={'height': '150px'}),
                             html.Br(),
                             html.Br(),
                             html.H4('''And we assumed your investments glide into a 60/40 split between stocks 
-                                and bonds by the time you retire''') 
-                        ])
-                        , width=6, style={'padding-left': '10%', 'padding-right': '10%'})
+                                and bonds by the time you retire''')
+                        ]), width=6, style={'padding-left': '10%', 'padding-right': '10%'})
                 ], style={'padding-top': '50px'}),
 
                 html.Br(),
                 html.Br(),
                 html.Br(),
 
-
-                html.H3("We don't actually know what the market will do, so we've mapped out a few scenarios for \
-                 how your savings might grow until retirement", style={'margin-left': '15%', 'margin-right': '15%'}),
-
-                html.Br(),
-                html.Br(),
-                html.Br(),
-
-
                 dbc.Row([
-                    dbc.Col(
-
-                        html.Div([
-
-                            html.H1("", className='display-6',
-                                    style={'text-align': 'center', 'color': 'white', }),
-
-                        ]), width=6),
 
                     dbc.Col(
+                    ''
+                    ,width=2),
 
+                    dbc.Col(html.Img(src='spreadsheet.png', style={'height': '150px'}), width=2),
+
+
+                    dbc.Col(
                         html.Div([
-
-                            html.H3("In an optimistic scenario (75th percentile), you have {}".format(retirement_wealths_text[75]), className='display-6',
-                                    style={'text-align': 'center', 'color': 'white', }),
-
-                        ]), width=6),
-
-
-                ], align="center", no_gutters=True),
+                        
+                        html.H3("We don't actually know what the market will do, so we've mapped out a few scenarios for \
+                     how your savings might grow until retirement", style={'margin-left': '0%', 'margin-right': '15%', 'display': 'inline-block'})
+                    ]), width = 8),
+                ]),
 
                 html.Br(),
-
-                      dbc.Row([
-                    dbc.Col(
-
-                        html.Div([
-
-                            html.H1("", className='display-6',
-                                    style={'text-align': 'center', 'color': 'white', }),
-
-                        ]), width=6),
-
-                    dbc.Col(
-
-                        html.Div([
-
-                          html.H3("In the baseline scenario (50th percentile), you have {}".format(retirement_wealths_text[50]), className='display-6',
-                                    style={'text-align': 'center', 'color': 'white', }),
-
-                        ]), width=6),
-
-
-                ], align="center", no_gutters=True),
-
+                html.Br(),
                 html.Br(),
 
-                dbc.Row([
-                    dbc.Col(
-
-                        html.Div([
-
-                            html.H1("", className='display-6',
-                                    style={'text-align': 'center', 'color': 'white', }),
-
-                        ]), width=6),
-
-                    dbc.Col(
-
-                        html.Div([
-
-                            html.H3("In a possible scenario (25th percentile), you have {}".format(retirement_wealths_text[25]), className='display-6',
-                                    style={'text-align': 'center', 'color': 'white', }),
-
-                        ]), width=6),
-
-
-                ], align="center", no_gutters=True),
-
+                dbc.Table.from_dataframe(retirement_df, style={'color': 'white', 'font-size': '1.5rem'},borderless=True, 
+                    hover=True, 
+                    striped=True),
 
                 html.Br(),
+                html.Br(),
+                html.Br(),
 
-                dbc.Row([
-                    dbc.Col(
-
-                        html.Div([
-
-                            html.H1("", className='display-6',
-                                    style={'text-align': 'center', 'color': 'white', }),
-
-                        ]), width=6),
-
-                    dbc.Col(
-
-                        html.Div([
-
-                            html.H3("In a pessimistic scenario (5th percentile), you have {}".format(retirement_wealths_text[5]), className='display-6',
-                                    style={'text-align': 'center', 'color': 'white', }),
-
-                        ]), width=6),
-
-
-                ], align="center", no_gutters=True),
+                html.A('Icons made by Freepik', href='https://www.flaticon.com/authors/freepik' )
 
             ], className='green-background')
 
