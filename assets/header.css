@@ -1,6 +1,7 @@
 
 .body {
 	text-align: center;
+	margin:0;
 }
 
 .app-header {
@@ -26,6 +27,7 @@
 .green-background {
 	background-color: #26BE81;
 	color: white;
+	margin: 0;
 }
 
 .text-note {
