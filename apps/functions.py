@@ -192,7 +192,7 @@ def wealth_distributions(x):
 
 
 def convert_dollar_number_to_text(x):
-    if x > 1000000:
+    if x >= 1000000:
         text = round((x / 1000000), 2)
         if text.is_integer():
             text = int(text)
