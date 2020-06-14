@@ -100,22 +100,22 @@ def serve_layout():
                         dbc.Col(width=1),
 
                         dbc.Col([
-                            dcc.Input(id='my_age_input', value='39',
+                            dcc.Input(id='my_age_input', value='35',
                                       className='input-box'),
                         ], width=2),
 
                         dbc.Col([
                             dcc.Input(id='retirement_age_input',
-                                      value='46', className='input-box'),
+                                      value='55', className='input-box'),
                         ], width=2),
 
                         dbc.Col([
-                            dcc.Input(id='my_wealth_input', value='$600,000',
+                            dcc.Input(id='my_wealth_input', value='$400,000',
                                       className='input-box'),
                         ], width=2),
 
                         dbc.Col([
-                            dcc.Input(id='my_save_input', value='$100,000',
+                            dcc.Input(id='my_save_input', value='$50,000',
                                       className='input-box'),
                         ], width=2),
 
