@@ -146,14 +146,6 @@ def random_walk_simulations(mean, stdev, periods, num_simulations, set_first_obs
     if set_first_obs_as_zero:
         random_returns[:, 0] = 0
 
-    # calculate the cumulative return (product of returns)
-
-    # convert to returns that can be cumulatively multiplied
-    # for example, a 3.4% return is now 1.034
-    cum_returns = random_returns.copy()
-    cum_returns += 1
-    cum_returns = np.cumprod(cum_returns, axis=1)
-
     return random_returns
 
 
@@ -191,7 +183,7 @@ def wealth_distributions(x):
             }
 
 
-def convert_dollar_number_to_text(x):
+def dollar_as_text(x):
     if x >= 1000000:
         text = round((x / 1000000), 2)
         if text.is_integer():
@@ -205,9 +197,51 @@ def convert_dollar_number_to_text(x):
 
     return text
 
-def convert_percent_to_text(x):
+def percent_as_text(x):
     return str(round(x*100,2)) + '%'
 
+def get_user_mortality_stats(user_age, mortality_table):
+
+    user_mortality = {}
+
+    # 1. get the expected age at death (average between male and female statistics)
+    expected_age_at_death = mortality_table.loc[user_age, 'expected_years_till_death_male']
+    expected_age_at_death += mortality_table.loc[user_age, 'expected_years_till_death_female']
+    expected_age_at_death /= 2
+    expected_age_at_death = int(expected_age_at_death) + user_age
+
+    user_mortality['expected_age_at_death'] = expected_age_at_death
+
+    # 2. calculate the cumulative survival probabilities
+    # (what age is the user expected to live to with 25%, 5%, 1% probability conditional
+    # on their current age)
+
+    # first, subset the dataset to drop ages that are less than the users expected age at death
+    # (this is going to be the 50% survivial probability)
+    this_mortality_df = mortality_table[user_age:]
+    this_mortality_df['cum_survival_prob'] = this_mortality_df['forward_survival_prob_1y'].cumprod()
+
+    age_list = this_mortality_df.index.tolist()
+    cum_survival_prob_list = this_mortality_df['cum_survival_prob'].tolist()
+
+    user_mortality['25%'] = calc_age_for_survival_prob(0.25, age_list, cum_survival_prob_list)
+    user_mortality['10%'] = calc_age_for_survival_prob(0.10, age_list, cum_survival_prob_list)
+    user_mortality['5%'] = calc_age_for_survival_prob(0.05, age_list, cum_survival_prob_list)
+    user_mortality['1%'] = calc_age_for_survival_prob(0.01, age_list, cum_survival_prob_list)
+
+    return user_mortality, age_list
+
+
+def get_age_at_negative_wealth(trajectory, age_list):
+
+    # find the index of the first instance when wealth for a given year
+    # is negative
+    i = next((x for x in iter(range(len(trajectory))) if trajectory[x] <= 0), 999)
+
+    if i == 999:
+        return 999
+    else:
+        return age_list[i]
 
 def get_historical_annual_returns():
 

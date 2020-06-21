@@ -54,9 +54,9 @@ this_page_header = dbc.Navbar(
                 [
                     dbc.Col(html.Img(src='/logo.png', height="80px")),
                     #dbc.Col(dbc.NavbarBrand("Navbar", className="ml-2")),
-                    dbc.Col(html.Div('ABOUT')),
-                    dbc.Col(html.Div('FAQ')),
-                    dbc.Col(html.Div('CONTACT')),
+                    # dbc.Col(html.Div('ABOUT')),
+                    # dbc.Col(html.Div('FAQ')),
+                    # dbc.Col(html.Div('CONTACT')),
                 ],
                 align="center",
                 no_gutters=True,

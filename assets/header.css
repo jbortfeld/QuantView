@@ -30,7 +30,12 @@
 	margin: 0;
 }
 
+
 .text-note {
 	color: grey;
 	font-size: 1.25em;
+}
+
+.white-text {
+	color: white;
 }
