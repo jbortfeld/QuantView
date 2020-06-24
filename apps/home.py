@@ -194,42 +194,44 @@ def display_page(n_clicks,
 
         # 1. set model parameters
         params = {'user_age': int(user_age),
-        'user_retirement_age': int(user_retirement_age),
-        'user_wealth': int(user_wealth.replace(',', '').replace('$', '')),
-        'user_save': int(user_save.replace(',', '').replace('$', '')),
-        'user_spend': int(user_spend.replace(',', '').replace('$', '')),
+                  'user_retirement_age': int(user_retirement_age),
+                  'user_wealth': int(user_wealth.replace(',', '').replace('$', '')),
+                  'user_save': int(user_save.replace(',', '').replace('$', '')),
+                  'user_spend': int(user_spend.replace(',', '').replace('$', '')),
 
-        'user_social_security_age': 67,
-        'user_social_security_benefit': 24000,
-        'num_simulations': 10000,
+                  'user_social_security_age': 67,
+                  'user_social_security_benefit': 24000,
+                  'num_simulations': 10000,
 
-        # derive extra parameters for modelling wealth trajectory
-        'years_to_retire': int(user_retirement_age) - int(user_age),
-        'years_to_retire_plus_one': int(user_retirement_age) - int(user_age) + 1,
-        'years_to_retire_minus_one': int(user_retirement_age) - int(user_age) - 1,
-        'current_year': datetime.datetime.now().year
-        }
-
+                  # derive extra parameters for modelling wealth trajectory
+                  'years_to_retire': int(user_retirement_age) - int(user_age),
+                  'years_to_retire_plus_one': int(user_retirement_age) - int(user_age) + 1,
+                  'years_to_retire_minus_one': int(user_retirement_age) - int(user_age) - 1,
+                  'current_year': datetime.datetime.now().year
+                  }
 
         # expected age at death based on mortality tables
         user_mortality, age_list = fn.get_user_mortality_stats(
             params['user_age'], mortality_df)
-        
+
         params['user_mortality'] = user_mortality
         params['age_list'] = age_list
-        params['years_to_1_pct_survival_prob'] = user_mortality['1%'] - params['user_age']
-        params['years_in_retirement'] = user_mortality['1%'] - params['user_retirement_age'] + 1
+        params['years_to_1_pct_survival_prob'] = user_mortality[
+            '1%'] - params['user_age']
+        params['years_in_retirement'] = user_mortality[
+            '1%'] - params['user_retirement_age'] + 1
         params['num_periods'] = user_mortality['1%'] - params['user_age'] + 1
 
         # get the index at retirement and at the final age
-        params['idx_at_retirement'] = params['user_retirement_age'] - params['user_age']
+        params['idx_at_retirement'] = params[
+            'user_retirement_age'] - params['user_age']
         params['idx_at_final_age'] = user_mortality['1%'] - params['user_age']
-
 
         # 3. simulate equity market returns based on a random walk
         equity_return_sim1 = fn.random_walk_simulations(mean=0.08,
                                                         stdev=0.14,
-                                                        periods=params['num_periods'],
+                                                        periods=params[
+                                                            'num_periods'],
                                                         num_simulations=params['num_simulations'])
 
         # set bond market returns
@@ -265,74 +267,23 @@ def display_page(n_clicks,
         equity_returns = equity_return_sim1
         bond_returns = bond_return_sim1
 
-        # 4. calculate the distribution of the annualized rate of return at
-        # each period
-        rates_of_return = equity_returns[:, 1:]
-        rates_of_return = rates_of_return + 1
-        rates_of_return = np.cumprod(rates_of_return, axis=1)
-        rates_of_return = fn.wealth_distributions(rates_of_return)
-
         # 5. calculate wealth scenarios
 
         # 5a. calculate asset allocation between equity and bonds in each
         # period
-        def financial_plan():
-            pass
-
-        allocations = fn.calc_asset_allocations(user_age=params['user_age'],
-                                                retirement_age=params['user_retirement_age'],
-                                                final_age=params['user_mortality']['1%'],
-                                                percent_at_retirement=0.6,
-                                                glide_length=10)
-
-        # make an array of allocations for every simulation (previously 'allocations' was a single array of size
-        # [1 x num_periods]. Now let's make it [num_simulations x num_periods] so that it is consistent with other arrays)
-        allocations = np.array([allocations for i in range(params['num_simulations'])])
-
-        # 5b. calculate the contributions and spending in each year
         contributions = fn.calc_contributions(user_age=params['user_age'],
-                                              retirement_age=params['user_retirement_age'],
-                                              final_age=params['user_mortality']['1%'],
+                                              retirement_age=params[
+                                                  'user_retirement_age'],
+                                              final_age=params[
+                                                  'user_mortality']['1%'],
                                               user_save=params['user_save'],
                                               user_spend=params['user_spend'],
-                                              user_social_security_age=params['user_social_security_age'],
+                                              user_social_security_age=params[
+                                                  'user_social_security_age'],
                                               user_social_security_benefit=params['user_social_security_benefit'])
 
-        # under the base case scenario, pull out the total amount saved by the
-        # user during the savings phase
-        total_user_save = contributions[:params['user_retirement_age'] - params['user_age']].sum()
-        total_user_save = fn.dollar_as_text(total_user_save)
-
-        # convert contributions from [num_periods] array to [num_simulations x num_periods]
-        contributions = np.array([contributions for i in range(params['num_simulations'])])
-
-        # 5c. calc wealth over time
-        # init an [num_simulations x 1]-sized array with the starting wealth
-        # value for each element
-        starting_wealth_array = np.full(
-            shape=params['num_simulations'], fill_value=params['user_wealth'])
-
-        # calculate the growth of wealth which incorporates market returns,
-        # contributions and spending in each period
-        wealths = fn.calc_wealth_trajectory(starting_wealth=starting_wealth_array,
-                                            equity_returns=equity_returns,
-                                            bond_returns=bond_returns,
-                                            allocations=allocations,
-                                            contributions=contributions)
-
-        # calculate the different wealth trajectories
-        # (eg the median path, 25th percentile path, etc)
-        trajectories = fn.wealth_distributions(wealths)
-
-        # 6. calculate stats about wealth trajectory
-
-        # get the final wealth values (as array) at the start of retiremente)
-        wealth_stats = fn.calc_wealth_milestones(trajectories,
-                                                 rates_of_return,
-                                                 params['age_list'],
-                                                 params['idx_at_retirement'],
-                                                 params['idx_at_final_age'],
-                                                 params['years_to_retire_minus_one'])
+        total_user_save, starting_wealth_array, allocations, contributions, wealths, trajectories, wealth_stats = fn.financial_plan(params, contributions, equity_returns,
+                                                                                                                                    bond_returns)
 
         # 2. build a dataframe that we'll use for making charts that show wealth over time
         # the ages range from the current user age to the age that the user has a 1% probability of reaching
@@ -353,7 +304,7 @@ def display_page(n_clicks,
 
         # make a table with information about wealth at the time of retirement
         retirement_df = pd.DataFrame({
-            'Scenario': ['Optimistic (75th percentile)','Expected (Average Outcome)', 'Possible (25th pct)', 'Pessimistic (5th pct)'],
+            'Scenario': ['Optimistic (75th percentile)', 'Expected (Average Outcome)', 'Possible (25th pct)', 'Pessimistic (5th pct)'],
             '$ at Retirement': [fn.dollar_as_text(wealth_stats[i]['wealth_at_retirement']) for i in [75, 'mean', 25, 5]],
             'Stock Market Avg Return': [fn.percent_as_text(wealth_stats[i]['rate_of_return_at_retirement']) for i in [75, 'mean', 25, 5]],
             'Bond Return': ['1%', '1%', '1%', '1%'],
@@ -364,7 +315,8 @@ def display_page(n_clicks,
         # make a table with information about when wealth may be depleted
 
         asset_depleted_text = [fn.depleted_text(wealth_stats[i]['age_at_negative_wealth'],
-                                                wealth_stats[i]['wealth_at_end'],
+                                                wealth_stats[i][
+                                                    'wealth_at_end'],
                                                 wealth_stats[i]['wealth_at_retirement']) for i in [75, 50, 25, 5]]
         depleted_df = pd.DataFrame({
             'Scenario': ['Optimistic (75th percentile)',
@@ -384,7 +336,8 @@ def display_page(n_clicks,
         # and the bars during the retirement phase are blue
         bar_colors = ['#26BE81'] * (params['years_to_retire'])
         bar_colors = bar_colors + ['green']
-        bar_colors = bar_colors + ['#26BE81'] * (params['years_in_retirement'] + 1)
+        bar_colors = bar_colors + ['#26BE81'] * \
+            (params['years_in_retirement'] + 1)
 
         # make chart that shows median wealth over time
         data1 = [
@@ -599,64 +552,125 @@ def display_page(n_clicks,
         # each final element of the 'scenario_analysis' dictionary is an array that represents additions/subtractions
         # from assets
 
-        scenario_analysis = {'save_more': {i: {} for i in range(4)},
-                             'work_longer': {i: {} for i in range(4)},
-                             'spend_less': {i: {} for i in range(4)}}
+        scenario_analysis = {'save_more': {i: {'age_at_negative_wealth': {},
+                                               'wealth_at_retirement': {},
+                                               'wealth_at_end': {},
+                                               'forever_income': {}
+                                               } for i in range(4)},
+                             'work_longer': {i: {'age_at_negative_wealth': {},
+                                                 'wealth_at_retirement': {},
+                                                 'wealth_at_end': {},
+                                                 'forever_income': {}} for i in range(4)},
+                             'spend_less': {i: {'age_at_negative_wealth': {},
+                                                'wealth_at_retirement': {},
+                                                'wealth_at_end': {},
+                                                'forever_income': {}} for i in range(4)}}
 
         for i in range(4):
 
             scenario_analysis['save_more'][i]['save_amount'] = fn.dollar_as_text(
                 params['user_save'] + (0.05 * params['user_save'] * i))
+
             _contributions = fn.calc_contributions(user_age=params['user_age'],
-                                                   retirement_age=params['user_retirement_age'],
-                                                   final_age=params['user_mortality']['1%'],
-                                                   user_save=params['user_save'] +
-                                                   ((0.05 * params['user_save']) * i),
-                                                   user_spend=params['user_spend'],
-                                                   user_social_security_age=params['user_social_security_age'],
+                                                   retirement_age=params[
+                                                       'user_retirement_age'],
+                                                   final_age=params[
+                                                       'user_mortality']['1%'],
+                                                   user_save=params[
+                                                       'user_save'] + (0.05 * params['user_save'] * i),
+                                                   user_spend=params[
+                                                       'user_spend'],
+                                                   user_social_security_age=params[
+                                                       'user_social_security_age'],
                                                    user_social_security_benefit=params['user_social_security_benefit'])
-            scenario_analysis['save_more'][i]['contributions'] = _contributions
-            _contributions = np.array([_contributions for i in range(params['num_simulations'])])
 
-            _wealths = fn.calc_wealth_trajectory(starting_wealth=starting_wealth_array,
-                                                 equity_returns=equity_returns,
-                                                 bond_returns=bond_returns,
-                                                 allocations=allocations,
-                                                 contributions=_contributions)
-            _trajectories = fn.wealth_distributions(_wealths)
+            _, _, _, _, _, _, _wealth_stats = fn.financial_plan(
+                params, _contributions, equity_returns, bond_returns)
+            
+            for pct in [75, 'mean', 25, 5]:
+                scenario_analysis['save_more'][i]['age_at_negative_wealth'][
+                    pct] = _wealth_stats[pct]['age_at_negative_wealth']
+                scenario_analysis['save_more'][i]['wealth_at_retirement'][
+                    pct] = _wealth_stats[pct]['wealth_at_retirement']
+                scenario_analysis['save_more'][i]['wealth_at_end'][
+                    pct] = _wealth_stats[pct]['wealth_at_end']
+                scenario_analysis['save_more'][i]['forever_income'][
+                    pct] = _wealth_stats[pct]['wealth_at_retirement'] * 0.04
 
-            scenario_analysis['work_longer'][i][ 'retire_age'] = params['user_retirement_age'] + (1 + i)
-            scenario_analysis['work_longer'][i]['contributions'] = fn.calc_contributions(user_age=params['user_age'],
-                                                                                         retirement_age=params['user_retirement_age'] +
-                                                                                         (1 * i),
-                                                                                         final_age=params['user_mortality'][
-                                                                                             '1%'],
-                                                                                         user_save=params['user_save'],
-                                                                                         user_spend=params['user_spend'],
-                                                                                         user_social_security_age=params['user_social_security_age'],
-                                                                                         user_social_security_benefit=params['user_social_security_benefit'])
+
+            scenario_analysis['work_longer'][i][
+                'retire_age'] = params['user_retirement_age'] + (1 + i)
+            _contributions = fn.calc_contributions(user_age=params['user_age'],
+                                                   retirement_age=params[
+                                                       'user_retirement_age'] + (1 + i),
+                                                   final_age=params[
+                                                       'user_mortality']['1%'],
+                                                   user_save=params[
+                                                       'user_save'],
+                                                   user_spend=params[
+                                                       'user_spend'],
+                                                   user_social_security_age=params[
+                                                       'user_social_security_age'],
+                                                   user_social_security_benefit=params['user_social_security_benefit'])
+
+            new_params = params.copy()
+            new_params['idx_at_retirement'] = new_params['user_retirement_age'] + (1 + i) - params['user_age']
+            _, _, _, _, _, _, _wealth_stats = fn.financial_plan(
+                new_params, _contributions, equity_returns, bond_returns)
+            for pct in [75, 'mean', 25, 5]:
+                scenario_analysis['work_longer'][i]['age_at_negative_wealth'][
+                    pct] = _wealth_stats[pct]['age_at_negative_wealth']
+                scenario_analysis['work_longer'][i]['wealth_at_retirement'][
+                    pct] = _wealth_stats[pct]['wealth_at_retirement']
+                scenario_analysis['work_longer'][i]['wealth_at_end'][
+                    pct] = _wealth_stats[pct]['wealth_at_end']
+                scenario_analysis['work_longer'][i]['forever_income'][
+                    pct] = _wealth_stats[pct]['wealth_at_retirement'] * 0.04
+
 
             scenario_analysis['spend_less'][i]['spend_amount'] = fn.dollar_as_text(
                 params['user_spend'] - ((0.05 * params['user_spend']) * i))
-            scenario_analysis['spend_less'][i]['contributions'] = fn.calc_contributions(user_age=params['user_age'],
-                                                                                        retirement_age=params['user_retirement_age'],
-                                                                                        final_age=params['user_mortality']['1%'],
-                                                                                        user_save=params['user_save'],
-                                                                                        user_spend=params['user_spend'] -
-                                                                                        ((0.05 * params['user_spend']) * i),
-                                                                                        user_social_security_age=params['user_social_security_age'],
-                                                                                        user_social_security_benefit=params['user_social_security_benefit'])
+
+            _contributions = fn.calc_contributions(user_age=params['user_age'],
+                                                   retirement_age=params['user_retirement_age'],
+                                                   final_age=params[
+                                                       'user_mortality']['1%'],
+                                                   user_save=params[
+                                                       'user_save'],
+                                                   user_spend=params[
+                                                       'user_spend'] - ((0.05 * params['user_spend']) * i),
+                                                   user_social_security_age=params[
+                                                       'user_social_security_age'],
+                                                   user_social_security_benefit=params['user_social_security_benefit'])
+
+            _, _, _, _, _, _, _wealth_stats = fn.financial_plan(
+                params, _contributions, equity_returns, bond_returns)
+            for pct in [75, 'mean', 25, 5]:
+                scenario_analysis['spend_less'][i]['age_at_negative_wealth'][
+                    pct] = _wealth_stats[pct]['age_at_negative_wealth']
+                scenario_analysis['spend_less'][i]['wealth_at_retirement'][
+                    pct] = _wealth_stats[pct]['wealth_at_retirement']
+                scenario_analysis['spend_less'][i]['wealth_at_end'][
+                    pct] = _wealth_stats[pct]['wealth_at_end']
+                scenario_analysis['spend_less'][i]['forever_income'][
+                    pct] = _wealth_stats[pct]['wealth_at_retirement'] * 0.04
 
         df_save_more = pd.DataFrame({'Savings Per Year': [scenario_analysis['save_more'][i]['save_amount'] for i in range(4)],
-                                     'Run out of Money at': [70, 80, 90, 100]
+                                    'Wealth at Retirement': [fn.dollar_as_text(scenario_analysis['save_more'][i]['wealth_at_retirement'][5]) for i in range(4)],  
+                                    'Forever Income': [fn.dollar_as_text(scenario_analysis['save_more'][i]['forever_income'][5]) for i in range(4)],            
+                                     'Run out of Money at': [scenario_analysis['save_more'][i]['age_at_negative_wealth'][5] for i in range(4)],
                                      })
 
         df_work_longer = pd.DataFrame({'Retirement Age': [scenario_analysis['work_longer'][i]['retire_age'] for i in range(4)],
-                                       'Run out of Money at': [70, 80, 90, 100]
+            'Wealth at Retirement': [fn.dollar_as_text(scenario_analysis['work_longer'][i]['wealth_at_retirement'][5]) for i in range(4)],  
+                                    'Forever Income': [fn.dollar_as_text(scenario_analysis['work_longer'][i]['forever_income'][5]) for i in range(4)],         
+                                       'Run out of Money at': [scenario_analysis['work_longer'][i]['age_at_negative_wealth'][5] for i in range(4)]
                                        })
 
         df_spend_less = pd.DataFrame({'Spending per year': [scenario_analysis['spend_less'][i]['spend_amount'] for i in range(4)],
-                                      'Run out of Money at': [70, 80, 90, 100]
+            'Wealth at Retirement': [fn.dollar_as_text(scenario_analysis['spend_less'][i]['wealth_at_retirement'][5]) for i in range(4)],  
+                                    'Forever Income': [fn.dollar_as_text(scenario_analysis['spend_less'][i]['forever_income'][5]) for i in range(4)],         
+                                      'Run out of Money at': [scenario_analysis['spend_less'][i]['age_at_negative_wealth'][5] for i in range(4)]
                                       })
 
         return html.Div([
@@ -868,7 +882,7 @@ def display_page(n_clicks,
 
                 html.Details([
 
-                    html.Summary('View Wealth Scenarios'),
+                    html.Summary('View Wealth Scenario Charts'),
 
                     html.Br(),
                     html.Br(),
@@ -919,24 +933,12 @@ def display_page(n_clicks,
                         style={'margin-left': '10%', 'margin-right': '10%'}),
 
                 html.Div('''You can't control the market, but you do have three main avenues for reducing the chance you'd 
-                    even run out of money during retirement''', className='white-text text-note'),
+                    run out of money during retirement, even in the pessimistic scenario''', className='white-text text-note'),
 
                 html.Br(),
                 html.Br(),
                 html.Br(),
                 html.Br(),
-
-                dcc.Dropdown(id='suggestions-input',
-                             options=[{'label': i, 'value': i}
-                                      for i in ['Assets at 101']],
-                             value='Assets at 101',
-                             style={'background-color': '#26BE81', 'font-color': 'white'}),
-
-                html.Br(),
-                html.Br(),
-                html.Br(),
-                html.Br(),
-
 
 
 

@@ -102,6 +102,65 @@ def calc_wealth_milestones(trajectories, rates_of_return, age_list, idx_at_retir
 
     return wealth_stats
 
+def financial_plan(params, contributions, equity_returns, bond_returns):
+
+    rates_of_return = equity_returns[:, 1:]
+    rates_of_return = rates_of_return + 1
+    rates_of_return = np.cumprod(rates_of_return, axis=1)
+    rates_of_return = wealth_distributions(rates_of_return)
+            
+    allocations = calc_asset_allocations(user_age=params['user_age'],
+                                            retirement_age=params['user_retirement_age'],
+                                            final_age=params['user_mortality']['1%'],
+                                            percent_at_retirement=0.6,
+                                            glide_length=10)
+
+    # make an array of allocations for every simulation (previously 'allocations' was a single array of size
+    # [1 x num_periods]. Now let's make it [num_simulations x num_periods] so that it is consistent with other arrays)
+    allocations = np.array([allocations for i in range(params['num_simulations'])])
+
+    # 5b. calculate the contributions and spending in each year
+
+    # under the base case scenario, pull out the total amount saved by the
+    # user during the savings phase
+    total_user_save = contributions[:params['user_retirement_age'] - params['user_age']].sum()
+    total_user_save = dollar_as_text(total_user_save)
+
+    # convert contributions from [num_periods] array to [num_simulations x num_periods]
+    contributions = np.array([contributions for i in range(params['num_simulations'])])
+
+    # 5c. calc wealth over time
+    # init an [num_simulations x 1]-sized array with the starting wealth
+    # value for each element
+    starting_wealth_array = np.full(
+        shape=params['num_simulations'], fill_value=params['user_wealth'])
+
+    # calculate the growth of wealth which incorporates market returns,
+    # contributions and spending in each period
+    wealths = calc_wealth_trajectory(starting_wealth=starting_wealth_array,
+                                        equity_returns=equity_returns,
+                                        bond_returns=bond_returns,
+                                        allocations=allocations,
+                                        contributions=contributions)
+
+    # calculate the different wealth trajectories
+    # (eg the median path, 25th percentile path, etc)
+    trajectories = wealth_distributions(wealths)
+
+    # 6. calculate stats about wealth trajectory
+
+    # get the final wealth values (as array) at the start of retiremente)
+    wealth_stats = calc_wealth_milestones(trajectories,
+                                             rates_of_return,
+                                             params['age_list'],
+                                             params['idx_at_retirement'],
+                                             params['idx_at_final_age'],
+                                             params['years_to_retire_minus_one'])
+
+    return total_user_save, starting_wealth_array, allocations, contributions, wealths, trajectories, wealth_stats
+
+
+
 def depleted_text(depleted_age, final_wealth, wealth_at_retirement):
     if (depleted_age == 999) & (final_wealth > (1.2 * wealth_at_retirement)):
         return "👍 Grow Forever"
