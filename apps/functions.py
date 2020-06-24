@@ -53,6 +53,65 @@ def calc_wealth_trajectory(starting_wealth, equity_returns, bond_returns, alloca
 
     return wealths
 
+def get_age_at_negative_wealth(trajectory, age_list):
+
+    # find the index of the first instance when wealth for a given year
+    # is negative
+    i = next((x for x in iter(range(len(trajectory))) if trajectory[x] <= 0), 999)
+
+    if i == 999:
+        return 999
+    else:
+        return age_list[i]
+
+def calc_wealth_milestones(trajectories, rates_of_return, age_list, idx_at_retirement, idx_at_final_age, years_to_retire_minus_one):
+
+    wealth_stats ={}
+
+    for i in ['mean', 75, 50, 25, 5, 1]:
+
+        wealth_stats[i] = {}
+
+        # get the $ value of weath at retirement for the given percentile
+        # (eg 1200000)
+        wealth_stats[i]['wealth_at_retirement'] = trajectories[i][idx_at_retirement]
+
+         # get the average annualized rate of return of the stock market through the 
+         # savings phase for the given percentile
+        wealth_stats[i]['rate_of_return_at_retirement'] = calc_geometric_rate_of_return(start_value=1,
+            end_value=rates_of_return[i][idx_at_retirement - 1],
+            num_periods=years_to_retire_minus_one)
+
+        # get the $ value of wealth at the max user age
+        wealth_stats[i]['wealth_at_end'] = trajectories[i][idx_at_final_age]
+
+        # get the average rate of return of the stock market until the max
+        # user age
+        wealth_stats[i]['rate_of_return_at_end'] = calc_geometric_rate_of_return(start_value=1,
+                                                                          end_value=rates_of_return[i][
+                                                                              idx_at_final_age - 1],
+                                                                          num_periods=idx_at_final_age - 1)
+        # find the index of the first instance when wealth for a given year
+        # is negative
+        temp = next((x for x in iter(range(len(trajectories[i]))) if trajectories[i][x] <= 0), 999)
+
+        if temp == 999:
+            wealth_stats[i]['age_at_negative_wealth'] = 999
+        else:
+            wealth_stats[i]['age_at_negative_wealth'] = age_list[temp]
+
+    return wealth_stats
+
+def depleted_text(depleted_age, final_wealth, wealth_at_retirement):
+    if (depleted_age == 999) & (final_wealth > (1.2 * wealth_at_retirement)):
+        return "👍 Grow Forever"
+    elif (depleted_age == 999) & (final_wealth <= (1.2 * wealth_at_retirement)) & (final_wealth > (0.8 * wealth_at_retirement)):
+        return "👍 Remain Roughly Stable Over Your Life"
+    elif (depleted_age == 999) & (final_wealth <= (0.8 * wealth_at_retirement)):
+        return "Decline But Last the Rest of Your Life"
+    else:
+        return "Run out at Age {}".format(depleted_age)
+
 
 def calc_geometric_rate_of_return(start_value, end_value, num_periods):
     return ((end_value / start_value) ** (1 / num_periods)) - 1.0
@@ -231,17 +290,6 @@ def get_user_mortality_stats(user_age, mortality_table):
 
     return user_mortality, age_list
 
-
-def get_age_at_negative_wealth(trajectory, age_list):
-
-    # find the index of the first instance when wealth for a given year
-    # is negative
-    i = next((x for x in iter(range(len(trajectory))) if trajectory[x] <= 0), 999)
-
-    if i == 999:
-        return 999
-    else:
-        return age_list[i]
 
 def get_historical_annual_returns():
 
