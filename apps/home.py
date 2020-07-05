@@ -100,27 +100,27 @@ def serve_layout():
                         dbc.Col(width=1),
 
                         dbc.Col([
-                            dcc.Input(id='my_age_input', value='35',
+                            dcc.Input(id='my_age_input', value='30',
                                       className='input-box'),
                         ], width=2),
 
                         dbc.Col([
                             dcc.Input(id='retirement_age_input',
-                                      value='55', className='input-box'),
+                                      value='60', className='input-box'),
                         ], width=2),
 
                         dbc.Col([
-                            dcc.Input(id='my_wealth_input', value='$400,000',
+                            dcc.Input(id='my_wealth_input', value='$30,000',
                                       className='input-box'),
                         ], width=2),
 
                         dbc.Col([
-                            dcc.Input(id='my_save_input', value='$50,000',
+                            dcc.Input(id='my_save_input', value='$15,000',
                                       className='input-box'),
                         ], width=2),
 
                         dbc.Col([
-                            dcc.Input(id='my_spend_input', value='$75,000',
+                            dcc.Input(id='my_spend_input', value='$90,000',
                                       className='input-box'),
                         ], width=2),
 
@@ -139,10 +139,10 @@ def serve_layout():
 
 
                 html.Div([
-                    dbc.Button("GO", id='start_input', style={'height': '75px', 'width': '150px', 'font-size': '3.5rem',
-                                                              'text-align': 'center', 'background-color': '#26BE81', 'border': '5px solid #267B83',
-                                                              'margin-bottom': '30px'})],
-                         style={'text-align': 'center'}),
+                    dbc.Button("GO",
+                               id='start_input',
+                               className='go-button')],
+                         ),
 
                 html.Br(),
                 html.Br(),
@@ -406,7 +406,7 @@ def display_page(n_clicks,
 
         chart_annotations = [
             {'x': params['user_retirement_age'],
-             'y': -0.2,
+             'y': -0.3,
              'yref': 'paper',
              'text': 'Retirement',
              'showarrow': False,
@@ -586,7 +586,7 @@ def display_page(n_clicks,
 
             _, _, _, _, _, _, _wealth_stats = fn.financial_plan(
                 params, _contributions, equity_returns, bond_returns)
-            
+
             for pct in [75, 'mean', 25, 5]:
                 scenario_analysis['save_more'][i]['age_at_negative_wealth'][
                     pct] = _wealth_stats[pct]['age_at_negative_wealth']
@@ -596,7 +596,6 @@ def display_page(n_clicks,
                     pct] = _wealth_stats[pct]['wealth_at_end']
                 scenario_analysis['save_more'][i]['forever_income'][
                     pct] = _wealth_stats[pct]['wealth_at_retirement'] * 0.04
-
 
             scenario_analysis['work_longer'][i][
                 'retire_age'] = params['user_retirement_age'] + (1 + i)
@@ -614,7 +613,8 @@ def display_page(n_clicks,
                                                    user_social_security_benefit=params['user_social_security_benefit'])
 
             new_params = params.copy()
-            new_params['idx_at_retirement'] = new_params['user_retirement_age'] + (1 + i) - params['user_age']
+            new_params['idx_at_retirement'] = new_params[
+                'user_retirement_age'] + (1 + i) - params['user_age']
             _, _, _, _, _, _, _wealth_stats = fn.financial_plan(
                 new_params, _contributions, equity_returns, bond_returns)
             for pct in [75, 'mean', 25, 5]:
@@ -627,12 +627,12 @@ def display_page(n_clicks,
                 scenario_analysis['work_longer'][i]['forever_income'][
                     pct] = _wealth_stats[pct]['wealth_at_retirement'] * 0.04
 
-
             scenario_analysis['spend_less'][i]['spend_amount'] = fn.dollar_as_text(
                 params['user_spend'] - ((0.05 * params['user_spend']) * i))
 
             _contributions = fn.calc_contributions(user_age=params['user_age'],
-                                                   retirement_age=params['user_retirement_age'],
+                                                   retirement_age=params[
+                                                       'user_retirement_age'],
                                                    final_age=params[
                                                        'user_mortality']['1%'],
                                                    user_save=params[
@@ -656,22 +656,33 @@ def display_page(n_clicks,
                     pct] = _wealth_stats[pct]['wealth_at_retirement'] * 0.04
 
         df_save_more = pd.DataFrame({'Savings Per Year': [scenario_analysis['save_more'][i]['save_amount'] for i in range(4)],
-                                    'Wealth at Retirement': [fn.dollar_as_text(scenario_analysis['save_more'][i]['wealth_at_retirement'][5]) for i in range(4)],  
-                                    'Forever Income': [fn.dollar_as_text(scenario_analysis['save_more'][i]['forever_income'][5]) for i in range(4)],            
+                                     'Wealth at Retirement': [fn.dollar_as_text(scenario_analysis['save_more'][i]['wealth_at_retirement'][5]) for i in range(4)],
+                                     'Forever Income': [fn.dollar_as_text(scenario_analysis['save_more'][i]['forever_income'][5]) for i in range(4)],
                                      'Run out of Money at': [scenario_analysis['save_more'][i]['age_at_negative_wealth'][5] for i in range(4)],
                                      })
 
         df_work_longer = pd.DataFrame({'Retirement Age': [scenario_analysis['work_longer'][i]['retire_age'] for i in range(4)],
-            'Wealth at Retirement': [fn.dollar_as_text(scenario_analysis['work_longer'][i]['wealth_at_retirement'][5]) for i in range(4)],  
-                                    'Forever Income': [fn.dollar_as_text(scenario_analysis['work_longer'][i]['forever_income'][5]) for i in range(4)],         
+                                       'Wealth at Retirement': [fn.dollar_as_text(scenario_analysis['work_longer'][i]['wealth_at_retirement'][5]) for i in range(4)],
+                                       'Forever Income': [fn.dollar_as_text(scenario_analysis['work_longer'][i]['forever_income'][5]) for i in range(4)],
                                        'Run out of Money at': [scenario_analysis['work_longer'][i]['age_at_negative_wealth'][5] for i in range(4)]
                                        })
 
         df_spend_less = pd.DataFrame({'Spending per year': [scenario_analysis['spend_less'][i]['spend_amount'] for i in range(4)],
-            'Wealth at Retirement': [fn.dollar_as_text(scenario_analysis['spend_less'][i]['wealth_at_retirement'][5]) for i in range(4)],  
-                                    'Forever Income': [fn.dollar_as_text(scenario_analysis['spend_less'][i]['forever_income'][5]) for i in range(4)],         
+                                      'Wealth at Retirement': [fn.dollar_as_text(scenario_analysis['spend_less'][i]['wealth_at_retirement'][5]) for i in range(4)],
+                                      'Forever Income': [fn.dollar_as_text(scenario_analysis['spend_less'][i]['forever_income'][5]) for i in range(4)],
                                       'Run out of Money at': [scenario_analysis['spend_less'][i]['age_at_negative_wealth'][5] for i in range(4)]
                                       })
+
+        outlook_header = "You're in Excellent Shape!"
+        outlook_note = "You are on track for financial security for the rest of your life"
+        expected_terminal_wealth = wealth_stats['mean']['wealth_at_end']
+        pessimistic_terminal_wealth = wealth_stats[5]['wealth_at_end']
+        if (expected_terminal_wealth > 0) & (pessimistic_terminal_wealth < 0):
+            outlook_header = "Your Finances Look Good"
+            outlook_note = "You are on a successful path to financial security but adverse market returns could derail your plans"
+        if (expected_terminal_wealth < 0) & (pessimistic_terminal_wealth < 0):
+            outlook_header = "Warning: You are Likely to Exhaust Your Savings"
+            outlook_note = "Your long-term financial plan may not be feasible"
 
         return html.Div([
 
@@ -685,10 +696,10 @@ def display_page(n_clicks,
 
                             html.Div([
 
-                                html.H1("You're in Excellent Shape!",
+                                html.H1(outlook_header,
                                         style={'text-align': 'center', 'color': '#26BE81', 'font-weight': 'bold'}),
 
-                                html.H4("You are on track for financial security for the rest of your life", className='display-6 text-note',
+                                html.H4(outlook_note, className='display-6 text-note',
                                         style={'text-align': 'center', 'color': '#grey', })
 
                             ]), width=5),
@@ -1051,9 +1062,11 @@ def display_page(n_clicks,
 
             ], className='green-background', style={'padding-left': '10%', 'padding-right': '10%'}),
 
-
+            html.Script('hello', type="text/javascript",
+                        src="//counter.websiteout.net/js/17/6/0/0"),
             html.A('Icons made by Freepik',
-                   href='https://www.flaticon.com/authors/freepik')
+                   href='https://www.flaticon.com/authors/freepik'),
+
 
 
         ])

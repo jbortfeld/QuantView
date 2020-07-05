@@ -39,3 +39,20 @@
 .white-text {
 	color: white;
 }
+
+.go-button {
+	height: 80px;
+	width: 150px;
+	font-size: 3.0rem;
+	font-weight: bold;
+	text-align: center;
+	background-color: #26BE81;
+	border: 0px solid #267B83;
+	margin: auto;
+	vertical-align: middle;
+	display: table-cell;
+	}
+
+.go-button:hover {
+	background-color: #267B83;
+}
