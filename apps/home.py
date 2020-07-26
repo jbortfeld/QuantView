@@ -14,6 +14,7 @@ from utilities import *
 import config
 from app import app
 from apps import functions as fn
+import visdcc
 
 # source data for actuarial calculations
 # https://www.ssa.gov/oact/STATS/table4c6.html#fn2
@@ -34,7 +35,7 @@ def serve_layout():
                     [
                         dbc.Col(
                             html.H1("Retirement Planning in Easy Mode",
-                                    className='display-4 app-header')
+                                    className='display-4 app-header', id='app-title')
                         )
                     ],
                 ),
@@ -78,7 +79,7 @@ def serve_layout():
                             html.Div('At What Age Do You Want to Retire?', className='input-questions'), width=2),
 
                         dbc.Col(
-                            html.Div('How Much Have You Currently Saved?', className='input-questions'), width=2),
+                            html.Div('How Much Have You Currently Saved?', className='input-questions', id='input-user-save'), width=2),
 
                         dbc.Col(
                             html.Div('How Much Do You Save a Year?', className='input-questions'), width=2),
@@ -154,7 +155,8 @@ def serve_layout():
                 html.Div(id='output'),
             ], className='body')
 
-        ], style={'padding-left': '0%', 'padding-right': '0%'})
+        ], style={'padding-left': '0%', 'padding-right': '0%'}),
+        visdcc.Run_js(id='javascript')
 
     ]
 
@@ -168,7 +170,8 @@ mortality_df['forward_survival_prob_1y'] = 1 - ((mortality_df['forward_death_pro
 
 
 # calculate account trajectory
-@app.callback(dash.dependencies.Output('output', 'children'),
+@app.callback([dash.dependencies.Output('output', 'children'),
+               dash.dependencies.Output('javascript', 'run'), ],
 
               [dash.dependencies.Input('start_input', 'n_clicks')],
 
@@ -186,18 +189,16 @@ def display_page(n_clicks,
                  user_spend):
 
     if n_clicks is None:
-        return html.Div()
+        return html.Div(), ''
 
     else:
-
-        print('hello')
 
         # 1. set model parameters
         params = {'user_age': int(user_age),
                   'user_retirement_age': int(user_retirement_age),
-                  'user_wealth': int(user_wealth.replace(',', '').replace('$', '')),
-                  'user_save': int(user_save.replace(',', '').replace('$', '')),
-                  'user_spend': int(user_spend.replace(',', '').replace('$', '')),
+                  'user_wealth': int(float(user_wealth.replace(',', '').replace('$', ''))),
+                  'user_save': int(float(user_save.replace(',', '').replace('$', ''))),
+                  'user_spend': int(float(user_spend.replace(',', '').replace('$', ''))),
 
                   'user_social_security_age': 67,
                   'user_social_security_benefit': 24000,
@@ -684,6 +685,30 @@ def display_page(n_clicks,
             outlook_header = "Warning: You are Likely to Exhaust Your Savings"
             outlook_note = "Your long-term financial plan may not be feasible"
 
+
+        num1=int(float(user_wealth.replace(',', '').replace('$', '')))
+        num1 = '${:,}'.format(num1)
+
+        num2=int(float(user_save.replace(',', '').replace('$', '')))
+        num2 = '${:,}'.format(num2)
+
+
+        num3=int(float(user_spend.replace(',', '').replace('$', '')))
+        num3 = '${:,}'.format(num3)
+
+
+
+        js = '''
+        var wealth = document.getElementById("my_wealth_input");
+        wealth.value='{}'
+
+        var save = document.getElementById("my_save_input");
+        save.value='{}'
+
+        var spend = document.getElementById("my_spend_input");
+        spend.value='{}'
+        '''.format(num1, num2, num3)
+
         return html.Div([
 
             html.Hr(),
@@ -1069,7 +1094,7 @@ def display_page(n_clicks,
 
 
 
-        ])
+        ]), js
 
 
 @app.callback(dash.dependencies.Output("collapse", "is_open"),
