@@ -79,7 +79,7 @@ def serve_layout():
                             html.Div('At What Age Do You Want to Retire?', className='input-questions'), width=2),
 
                         dbc.Col(
-                            html.Div('How Much Have You Currently Saved?', className='input-questions', id='input-user-save'), width=2),
+                            html.Div('How Much Have You Currently Saved?', className='input-questions'), width=2),
 
                         dbc.Col(
                             html.Div('How Much Do You Save a Year?', className='input-questions'), width=2),
@@ -169,9 +169,57 @@ mortality_df['forward_survival_prob_1y'] = 1 - ((mortality_df['forward_death_pro
                                                  mortality_df['forward_death_prob_1y_female']) / 2)
 
 
+
+@app.callback(dash.dependencies.Output('javascript', 'run'),
+    [dash.dependencies.Input('my_wealth_input', 'n_blur'),
+               dash.dependencies.Input('my_save_input', 'n_blur'),
+               dash.dependencies.Input('my_spend_input', 'n_blur'),
+               dash.dependencies.Input('my_wealth_input', 'value'),
+               dash.dependencies.Input('my_save_input', 'value'),
+               dash.dependencies.Input('my_spend_input', 'value'),
+               ])
+def reformat_input(wealth_change, save_change, spend_change,
+    user_wealth, user_save, user_spend):
+
+    print(user_wealth, user_save, user_spend)
+
+    if wealth_change or save_change or spend_change:
+
+        try:
+            num1=int(float(user_wealth.replace(',', '').replace('$', '')))
+            num1 = '${:,}'.format(num1)
+        except:
+            num1 = '$0'
+
+        try:
+            num2=int(float(user_save.replace(',', '').replace('$', '')))
+            num2 = '${:,}'.format(num2)
+        except:
+            num2 = '$0'
+
+        try:
+            num3=int(float(user_spend.replace(',', '').replace('$', '')))
+            num3 = '${:,}'.format(num3)
+        except:
+            num3 = '$0'
+
+
+        js = '''
+        var wealth = document.getElementById("my_wealth_input");
+        wealth.value='{}'
+
+        var save = document.getElementById("my_save_input");
+        save.value='{}'
+
+        var spend = document.getElementById("my_spend_input");
+        spend.value='{}'
+        '''.format(num1, num2, num3)
+
+        return js
+
+
 # calculate account trajectory
-@app.callback([dash.dependencies.Output('output', 'children'),
-               dash.dependencies.Output('javascript', 'run'), ],
+@app.callback(dash.dependencies.Output('output', 'children'),
 
               [dash.dependencies.Input('start_input', 'n_clicks')],
 
@@ -189,7 +237,7 @@ def display_page(n_clicks,
                  user_spend):
 
     if n_clicks is None:
-        return html.Div(), ''
+        return html.Div(), 
 
     else:
 
@@ -201,7 +249,7 @@ def display_page(n_clicks,
                   'user_spend': int(float(user_spend.replace(',', '').replace('$', ''))),
 
                   'user_social_security_age': 67,
-                  'user_social_security_benefit': 24000,
+                  'user_social_security_benefit': 18000,
                   'num_simulations': 10000,
 
                   # derive extra parameters for modelling wealth trajectory
@@ -709,6 +757,8 @@ def display_page(n_clicks,
         spend.value='{}'
         '''.format(num1, num2, num3)
 
+        js = ''
+
         return html.Div([
 
             html.Hr(),
@@ -873,7 +923,7 @@ def display_page(n_clicks,
                             html.Img(src='pension.png', style={
                                      'height': '150px'}),
 
-                            html.H4('''And we assume you'll receive $2K each month in social security benefits starting
+                            html.H4('''And we assume you'll receive $1,500 each month in social security benefits starting
                             at age 67''', style={'color': '#267B83'})
 
                         ]), width=4),
@@ -1094,7 +1144,7 @@ def display_page(n_clicks,
 
 
 
-        ]), js
+        ])
 
 
 @app.callback(dash.dependencies.Output("collapse", "is_open"),
