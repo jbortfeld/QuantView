@@ -14,6 +14,7 @@ from app import server
 from apps import nav_bar
 from apps import home
 from apps import functions
+from apps import about
 
 
 # APP HEADER
@@ -86,8 +87,22 @@ search_bar = dbc.Row(
 blog_address='https://medium.com/@jbortfeld/an-easy-app-for-retirement-planning-59dcf37be97'
 
 this_page_header = dbc.Row([
-        dbc.Col(html.Img(src='/logo.png', height="70px"), width=10, style={'margin': '10px'}),
-        dbc.Col(html.A('BLOG', href=blog_address, target="_blank", style={'color': 'white'}),  style={'vertical-align': 'middle', 'margin': 'auto'}),
+        dbc.Col(
+            html.A(
+                html.Img(src='/logo.png', height="70px",)
+                , href='/')
+        , width=10, style={'margin': '10px'}),
+        dbc.Col(
+            html.A('BLOG', href=blog_address, 
+                target="_blank", 
+                style={'color': 'white', 'font-weight': 'bold'})
+            ,  style={'vertical-align': 'middle', 'margin': 'auto'}
+        ),
+        dbc.Col(
+            html.A('ABOUT', href='/about', 
+                style={'color': 'white', 'font-weight': 'bold'})
+            ,  style={'vertical-align': 'middle', 'margin': 'auto'}
+        ),
     ], no_gutters=True, style={'background-color': "#2FC086", 'height': '90px'}
 )
 
@@ -113,6 +128,8 @@ def display_page(pathname):
     #     return recession_paths.layout()
     # if pathname == '/markets_in_rear_view':
     #     return markets_in_rear_view.layout()
+    elif pathname == '/about':
+        return about.layout()
     else:
         return '404'
 
