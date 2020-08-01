@@ -46,31 +46,50 @@ search_bar = dbc.Row(
     align="center",
 )
 
-this_page_header = dbc.Navbar(
-    [
-        html.A(
-            # Use row and col to control vertical alignment of logo / brand
-            dbc.Row(
-                [
-                    dbc.Col(html.Img(src='/logo.png', height="80px")),
-                    #dbc.Col(dbc.NavbarBrand("Navbar", className="ml-2")),
-                    # dbc.Col(html.Div('ABOUT')),
-                    # dbc.Col(html.Div('FAQ')),
-                    # dbc.Col(html.Div('CONTACT')),
-                ],
-                align="center",
-                no_gutters=True,
-            ),
-            href="https://plot.ly",
-        ),
-        # dbc.NavbarToggler(id="navbar-toggler"),
-        # dbc.Colla[pse(search_bar, id="navbar-collapse", navbar=True),
-    ],
-    color="#2FC086",
-    dark=True,
+# this_page_header = dbc.Navbar(
+#     [
+
+#         html.Div(
+#             # Use row and col to control vertical alignment of logo / brand
+#             dbc.Row(
+#                 [
+#                     dbc.Col(html.Img(src='/logo.png', height="80px")),
+#                     #dbc.Col(dbc.NavbarBrand("Navbar", className="ml-2")),
+#                     #dbc.Col(html.Div('ABOUT')),
+#                     # dbc.Col(html.Div('FAQ')),
+#                     # dbc.Col(html.Div('CONTACT')),
+#                 ],
+#                 align="center",
+#                 no_gutters=True,
+#             )
+#         ),
+#         dbc.Col(html.Div('BLOG')),
+#         dbc.Col(html.Div('ABOUT')),
+#         # dbc.NavbarToggler(id="navbar-toggler"),
+#         # dbc.Colla[pse(search_bar, id="navbar-collapse", navbar=True),
+#     ],
+#     color="#2FC086",
+#     dark=True,
+# )
+
+# this_page_header = dbc.NavbarSimple([
+
+#     dbc.Row([
+#         dbc.Col(html.Div('BLOG'), width=4, style={'color': 'white'}),
+#         dbc.Col(html.Div('ABOUT'), width=4, style={'color': 'white'}),
+#         dbc.Col(html.Div('DISCLAIMER'), width=4, style={'color': 'white'}),
+#         ])
+
+
+#     ],brand='hello', color="#2FC086", dark=True, style={'border': '2px solid blue'})
+
+blog_address='https://medium.com/@jbortfeld/an-easy-app-for-retirement-planning-59dcf37be97'
+
+this_page_header = dbc.Row([
+        dbc.Col(html.Img(src='/logo.png', height="70px"), width=10, style={'margin': '10px'}),
+        dbc.Col(html.A('BLOG', href=blog_address, target="_blank", style={'color': 'white'}),  style={'vertical-align': 'middle', 'margin': 'auto'}),
+    ], no_gutters=True, style={'background-color': "#2FC086", 'height': '90px'}
 )
-
-
 
 app.layout = html.Div([
 

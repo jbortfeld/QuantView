@@ -41,7 +41,6 @@ def serve_layout():
                 ),
 
                 html.Br(),
-                html.Br(),
 
                 dbc.Row([
 
@@ -61,8 +60,6 @@ def serve_layout():
 
                 ], no_gutters=True, align='center'),
 
-                html.Br(),
-                html.Br(),
                 html.Br(),
                 html.Br(),
 
@@ -116,12 +113,12 @@ def serve_layout():
                         ], width=2),
 
                         dbc.Col([
-                            dcc.Input(id='my_save_input', value='$15,000',
+                            dcc.Input(id='my_save_input', value='$9,000',
                                       className='input-box'),
                         ], width=2),
 
                         dbc.Col([
-                            dcc.Input(id='my_spend_input', value='$90,000',
+                            dcc.Input(id='my_spend_input', value='$60,000',
                                       className='input-box'),
                         ], width=2),
 
@@ -142,7 +139,8 @@ def serve_layout():
                 html.Div([
                     dbc.Button("GO",
                                id='start_input',
-                               className='go-button')],
+                               className='go-button',
+                               )],
                          ),
 
                 html.Br(),
@@ -151,8 +149,9 @@ def serve_layout():
                 html.Br(),
 
 
+                # THIS IS THE CONTAINER FOR THE MAIN APP OUTPUT
+                dbc.Spinner(html.Div(id='output'), color='#2FC086', size='lg'),
 
-                html.Div(id='output'),
             ], className='body')
 
         ], style={'padding-left': '0%', 'padding-right': '0%'}),
@@ -169,9 +168,8 @@ mortality_df['forward_survival_prob_1y'] = 1 - ((mortality_df['forward_death_pro
                                                  mortality_df['forward_death_prob_1y_female']) / 2)
 
 
-
 @app.callback(dash.dependencies.Output('javascript', 'run'),
-    [dash.dependencies.Input('my_wealth_input', 'n_blur'),
+              [dash.dependencies.Input('my_wealth_input', 'n_blur'),
                dash.dependencies.Input('my_save_input', 'n_blur'),
                dash.dependencies.Input('my_spend_input', 'n_blur'),
                dash.dependencies.Input('my_wealth_input', 'value'),
@@ -179,30 +177,29 @@ mortality_df['forward_survival_prob_1y'] = 1 - ((mortality_df['forward_death_pro
                dash.dependencies.Input('my_spend_input', 'value'),
                ])
 def reformat_input(wealth_change, save_change, spend_change,
-    user_wealth, user_save, user_spend):
+                   user_wealth, user_save, user_spend):
 
     print(user_wealth, user_save, user_spend)
 
     if wealth_change or save_change or spend_change:
 
         try:
-            num1=int(float(user_wealth.replace(',', '').replace('$', '')))
+            num1 = int(float(user_wealth.replace(',', '').replace('$', '')))
             num1 = '${:,}'.format(num1)
         except:
             num1 = '$0'
 
         try:
-            num2=int(float(user_save.replace(',', '').replace('$', '')))
+            num2 = int(float(user_save.replace(',', '').replace('$', '')))
             num2 = '${:,}'.format(num2)
         except:
             num2 = '$0'
 
         try:
-            num3=int(float(user_spend.replace(',', '').replace('$', '')))
+            num3 = int(float(user_spend.replace(',', '').replace('$', '')))
             num3 = '${:,}'.format(num3)
         except:
             num3 = '$0'
-
 
         js = '''
         var wealth = document.getElementById("my_wealth_input");
@@ -237,7 +234,7 @@ def display_page(n_clicks,
                  user_spend):
 
     if n_clicks is None:
-        return html.Div(), 
+        return html.Div(),
 
     else:
 
@@ -733,18 +730,14 @@ def display_page(n_clicks,
             outlook_header = "Warning: You are Likely to Exhaust Your Savings"
             outlook_note = "Your long-term financial plan may not be feasible"
 
-
-        num1=int(float(user_wealth.replace(',', '').replace('$', '')))
+        num1 = int(float(user_wealth.replace(',', '').replace('$', '')))
         num1 = '${:,}'.format(num1)
 
-        num2=int(float(user_save.replace(',', '').replace('$', '')))
+        num2 = int(float(user_save.replace(',', '').replace('$', '')))
         num2 = '${:,}'.format(num2)
 
-
-        num3=int(float(user_spend.replace(',', '').replace('$', '')))
+        num3 = int(float(user_spend.replace(',', '').replace('$', '')))
         num3 = '${:,}'.format(num3)
-
-
 
         js = '''
         var wealth = document.getElementById("my_wealth_input");
