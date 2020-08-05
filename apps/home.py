@@ -363,7 +363,7 @@ def display_page(n_clicks,
         asset_depleted_text = [fn.depleted_text(wealth_stats[i]['age_at_negative_wealth'],
                                                 wealth_stats[i][
                                                     'wealth_at_end'],
-                                                wealth_stats[i]['wealth_at_retirement']) for i in [75, 50, 25, 5]]
+                                                wealth_stats[i]['wealth_at_retirement']) for i in [75, 'mean', 25, 5]]
         depleted_df = pd.DataFrame({
             'Scenario': ['Optimistic (75th percentile)',
                          'Expected (Avg Outcome)',
