@@ -66,7 +66,7 @@ def serve_layout():
 		html.Br(),
 		html.Br(),
 
-		html.Div('''Questions or suggestions? Please write me at quantview@gmail.com''', 
+		html.Div('''Questions or suggestions? Please write me at quantviews@gmail.com''',
 			style={'text-align': 'left', 'margin-left': '5%', 'font-size': 18, 'color': '#2FC086'}),
 
 		html.Br(),
