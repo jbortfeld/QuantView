@@ -44,7 +44,8 @@ def serve_layout():
         html.Div('''The Absorption Ratio (AR) measures the degree to which different assets are being driven by a common
         factor. When assets are "tightly coupled", there is a risk that an adverse event could propagate widely across
          the entire market. For example, it is argued that in 2020 a wide variety of asset prices are rising
-          due to common support from low interest rates and stimulative fiscal policy.
+          due to common support from low interest rates and stimulative fiscal policy. If confidence in continued
+          government support was to be undermined, then it is conceivable that the whole market would fall.
           From a technical standpoint, the AR is the fraction of total
         variance explained by variation in the first principal component.'''),
         html.Br(),
