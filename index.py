@@ -15,6 +15,7 @@ from apps import nav_bar
 from apps import home
 from apps import functions
 from apps import about
+from apps import systemic_risk
 
 
 # APP HEADER
@@ -130,6 +131,8 @@ def display_page(pathname):
     #     return markets_in_rear_view.layout()
     elif pathname == '/about':
         return about.layout()
+    elif pathname == '/systemic-risk':
+        return systemic_risk.layout()
     else:
         return '404'
 
@@ -137,7 +140,6 @@ def display_page(pathname):
 # Add a static image route that serves images from desktop
 # Be *very* careful here - you don't want to serve arbitrary files
 # from your computer or server
-image_directory = '/Users/education/Desktop'
 image_directory = 'images/'
 static_image_route = '/'
 @app.server.route('{}<image_path>.png'.format(static_image_route))
