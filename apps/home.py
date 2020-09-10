@@ -162,7 +162,7 @@ def serve_layout():
 
 layout = serve_layout
 
-mortality_df = pd.read_csv('mortality_table.csv')
+mortality_df = pd.read_csv('data/mortality_table.csv')
 mortality_df.set_index('current_age', inplace=True)
 mortality_df['forward_survival_prob_1y'] = 1 - ((mortality_df['forward_death_prob_1y_male'] +
                                                  mortality_df['forward_death_prob_1y_female']) / 2)

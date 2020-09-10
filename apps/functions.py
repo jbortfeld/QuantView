@@ -352,8 +352,7 @@ def get_user_mortality_stats(user_age, mortality_table):
 
 def get_historical_annual_returns():
 
-    df = pd.read_csv('lt_annual_asset_returns.csv')
-    print(df.columns)
+    df = pd.read_csv('data/lt_annual_asset_returns.csv')
     df = df[['year', 'sp500_including_dividends_real_return',
              'ust_3m_real_return', 'ust_real_return', 'bbb_corporate_real_return']]
 
