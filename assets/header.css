@@ -8,6 +8,10 @@
 	color: #26BE81;
 }
 
+.image {
+    object-fit: contain;
+}
+
 .input-questions {
 	color: #267B83; 
 	font-size: 20px;
@@ -55,4 +59,21 @@
 
 .go-button:hover {
 	background-color: #267B83;
+}
+
+.systemic-risk-header {
+    background-image: url("/assets/test.jpg");
+    min-height: 1000px;
+    position: relative;
+    opacity: 1;
+    background-position: center;
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+
+}
+
+.multi-column {
+    column-count: 2;
+
 }
