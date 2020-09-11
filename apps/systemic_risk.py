@@ -11,6 +11,25 @@ import numpy as np
 
 def serve_layout():
 
+
+    # 1. Figure 1: Absorption Ratio level over time
+    ar = pd.read_csv('data/absorption_ratio.csv')
+
+    ar_dict = ar[['ar', 'date']].copy()
+    ar_dict['date'] = pd.to_datetime(ar_dict['date'])
+    ar_dict = ar_dict.set_index('date').to_dict(orient='index')
+
+    def get_ar_value_on_date(ar_dict: dict, date: pd.Timestamp) -> float:
+
+        if date < min(ar_dict.keys()):
+            return -99
+
+        if date in ar_dict.keys():
+            return ar_dict[date]['ar']
+        else:
+            return get_ar_value_on_date(ar_dict, date-pd.Timedelta(days=1))
+
+    # build data for recession shading on charts
     recession_dates = [
         ('1973-11-30', '1975-03-31'),
         ('1980-01-31', '1980-07-31'),
@@ -21,8 +40,6 @@ def serve_layout():
         ('2020-02-29', '2020-06-30'),
     ]
 
-
-    ar = pd.read_csv('data/absorption_ratio.csv')
     ar_shapes=[
         {
             'type': 'rect',
@@ -36,33 +53,76 @@ def serve_layout():
             'fillcolor': '#5DADE2',
             'opacity': 0.2,
         } for r in recession_dates
+    ]
 
+    # build data for event annotions on charts
+    annotations = [
+        ('1973-10-31', 'Oil Embargo'),
+        ('1987-10-31', 'Black Monday'),
+        ('1990-08-31', 'Iraq'),
+        #('1998-08-31', 'Russia Default'),
+        ('1998-09-30', 'LTCM'),
+        #('2008-03-14', 'Bear Stearns'),
+        ('2008-09-13', 'Lehman'),
+        ('2001-09-30', '9/11'),
+        ('2020-02-29', 'COVID'),
+
+    ]
+    ar_annotations = [
+        {'x': a[0],
+         'y': get_ar_value_on_date(ar_dict, pd.to_datetime(a[0])) + 0.03,
+         'text': a[1],
+         'font': {'color': 'red'}
+         } for a in annotations
 
     ]
 
     ar_data = [{'x': ar['date'],
                 'y': ar['ar'],
                 'type': 'line_markers',
-                'marker': {'color': '#EC7063'},
+                'marker': {'color': '#26BE81'},
                 }]
     ar_layout={'height': 400,
-               'margin': {'t': 0},
+               'margin': {'t': 5, 'l': 20},
                'yaxis': {'range': [0.5, 1.0]},
-               'shapes': ar_shapes}
+               'shapes': ar_shapes,
+               'annotations': ar_annotations}
 
 
     ar_fig={'data': ar_data, 'layout': ar_layout, }
 
-    turb = pd.read_csv('data/turbulence.csv')
-    turb['turbulence'] = turb['turbulence'].rolling(window=120).mean()
-    turb_data = [{'x': turb['date'],
-                'y': turb['turbulence'],
-                'type': 'bar',
-                'marker': { 'color': '#50D890'}}]
-    turb_layout = {'height': 400,
-                 'title': 'Financial Turbulence'}
+    # Figure 2: AR Shift
+    ar_shift = pd.read_csv('data/ar_shift.csv')
+    ar_shift_dict = ar_shift[['ar_shift', 'date']].copy()
+    ar_shift_dict.rename(columns={'ar_shift': 'ar'}, inplace=True)
+    ar_shift_dict['date'] = pd.to_datetime(ar_shift_dict['date'])
+    ar_shift_dict = ar_shift_dict.set_index('date').to_dict(orient='index')
 
-    turb_fig = {'data': turb_data, 'layout': turb_layout}
+    ar_shift_annotations = [
+        {'x': a[0],
+         'y': get_ar_value_on_date(ar_shift_dict, pd.to_datetime(a[0])) + .5,
+         'text': a[1],
+         'font': {'color': 'red'}
+         } for a in annotations
+
+        ]
+
+    ar_shift_data = [{'x': ar_shift['date'],
+                'y': ar_shift['ar_shift'],
+                'type': 'line_markers',
+                'marker': {'color': '#26BE81'},
+                },]
+
+    ar_shift_layout = {'height': 400,
+                       'margin': {'t': 5, 'l': 20},
+                       'shapes': ar_shapes,
+                       'annotations': ar_shift_annotations
+                 }
+
+    ar_shift_fig = {'data': ar_shift_data, 'layout': ar_shift_layout, }
+
+
+
 
     return [
         html.Div([
@@ -212,13 +272,87 @@ def serve_layout():
         html.Br(),
         html.Br(),
 
-        html.H3('''Replicated Absorption Ratio (Extended History)''', style={'text-align': 'left', 'margin-bottom': '0%'}),
-        dcc.Graph(id='absorption-ratio', figure=ar_fig),
+        html.Hr(style={'border': '1px solid grey'}),
 
         html.Br(),
         html.Br(),
 
-        html.H2('Summary', style={'color': 'grey'}),
+        html.H2('Key Result 1: Recognizable Events Correspond to Jumps in the Absorption Ratio', style={'color': 'grey'}),
+        html.H5('''Our replication is in agreement''', style={'fontWeight': 'bold'}),
+
+        html.Br(),
+        html.Br(),
+
+        dbc.Row([
+
+            dbc.Col([
+
+                html.P('''We were able to recreate the Absorption Ratio series and satisfactorily match the levels and
+                trends in the original paper which covered 1998-2010. In the out-of-sample period recognizable events
+                including Black Monday, Iraq’s invasion of Kuwait, and the COVID-19 pandemic all correspond to jumps
+                in the Absorption Ratio.''', style={'fontSize': '1.25rem', 'lineHeight': '200%'}),
+
+
+            ], width=4),
+
+            dbc.Col([
+
+                html.H4('''Figure 1: Replicated Absorption Ratio (Extended History)''',
+                        style={'text-align': 'left', 'margin-bottom': '0%'}),
+                dcc.Graph(id='absorption-ratio', figure=ar_fig),
+
+
+            ], width=8, style={'paddingLeft': '20px', 'paddingRight': '20px'})
+
+        ]),
+
+            html.Br(),
+            html.Br(),
+
+            dbc.Row([
+
+                dbc.Col([
+
+                    html.P('''The AR Shift (z-score) is noiser however and it's not clear the degree to which all instances of
+                    sharply rising or falling levels in the AR correspond to financial stress.''', style={'fontSize': '1.25rem', 'lineHeight': '200%'}),
+
+                    html.P('''AR Shift values >0 indicate rising systemic risk (relative to the past 1Y) while
+                    values <0 indicate falling systemic risk.''',
+                           style={'fontSize': '1.25rem', 'lineHeight': '200%'}),
+
+                ], width=4),
+
+                dbc.Col([
+
+                    html.H4('''Figure 2: AR Shifts Show Periods of Rising and Falling Systemic Risk''',
+                            style={'text-align': 'left', 'margin-bottom': '0%'}),
+                    dcc.Graph(id='absorption-ratio-shift', figure=ar_shift_fig),
+
+                ], width=8, style={'paddingLeft': '20px', 'paddingRight': '20px'})
+
+            ]),
+
+            html.Br(),
+            html.Br(),
+
+            html.H2('Key Result 2: The Worst Days for the Market Were Preceded by Above Average Systemic Risk',
+                    style={'color': 'grey'}),
+
+            html.Br(),
+            html.Br(),
+
+            html.Br(),
+            html.Br(),
+            html.Br(),
+            html.Br(),
+            html.Br(),
+            html.Br(),
+            html.Br(),
+            html.Br(),
+            html.Br(),
+            html.Br(),
+            html.Br(),
+            html.Br(),
 
         ], style={'margin': '0% 5% 0% 5%', 'text-align': 'left'}),
 
