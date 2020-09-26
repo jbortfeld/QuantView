@@ -89,7 +89,7 @@ def serve_layout():
                 'marker': {'color': '#26BE81'},
                 }]
     ar_layout={'height': 400,
-               'margin': {'t': 5, 'l': 20},
+               'margin': {'t': 5, 'l': 40, 'b': 40},
                'yaxis': {'range': [0.5, 1.0]},
                'shapes': ar_shapes,
                'annotations': ar_annotations}
@@ -120,7 +120,7 @@ def serve_layout():
                 },]
 
     ar_shift_layout = {'height': 400,
-                       'margin': {'t': 5, 'l': 20},
+                       'margin': {'t': 5, 'l': 40, 'b': 40},
                        'shapes': ar_shapes,
                        'annotations': ar_shift_annotations
                  }
@@ -255,6 +255,7 @@ def serve_layout():
                                                                    ]),
 
         html.Br(),
+        html.Br(),
 
         html.Div(id='theory-purpose-content', style={}),
 
@@ -287,9 +288,15 @@ def serve_layout():
 
             dbc.Col([
 
-                html.H4('''Figure 1: Replicated Absorption Ratio (Extended History)''',
-                        style={'text-align': 'left', 'margin-bottom': '0%'}),
-                dcc.Graph(id='absorption-ratio', figure=ar_fig),
+                html.Div([
+
+                    html.H4('''Figure 1: Replicated Absorption Ratio (Extended History)''',
+                    style={'backgroundColor': '#267B83',
+                             'color': 'white',
+                             'paddingLeft': '10px'}),
+                    dcc.Graph(id='absorption-ratio', figure=ar_fig),
+
+                ], style={'border': '2px solid #267B83'})
 
 
             ], width=8, style={'paddingLeft': '20px', 'paddingRight': '20px'})
@@ -314,9 +321,15 @@ def serve_layout():
 
                 dbc.Col([
 
-                    html.H4('''Figure 2: AR Shifts Show Periods of Rising and Falling Systemic Risk''',
-                            style={'text-align': 'left', 'margin-bottom': '0%'}),
-                    dcc.Graph(id='absorption-ratio-shift', figure=ar_shift_fig),
+                    html.Div([
+
+                        html.H4('''Figure 2: AR Shifts Show Periods of Rising and Falling Systemic Risk''',
+                        style={'backgroundColor': '#267B83',
+                                 'color': 'white',
+                                 'paddingLeft': '10px'}),
+                        dcc.Graph(id='absorption-ratio-shift', figure=ar_shift_fig),
+
+                    ], style={'border': '2px solid #267B83'}),
 
                 ], width=8, style={'paddingLeft': '20px', 'paddingRight': '20px'})
 
@@ -337,46 +350,29 @@ def serve_layout():
             html.Br(),
             html.Br(),
 
-            html.Div([
-
-                    html.P('''We identified the periods with the worst returns. For example October 19, 1987 "Black
-                    Monday" was the worst one-day return (-20%) and March 23, 2020 was the worst trailing one-month
-                    return (-33%). For each of those periods we took the AR Shift at the start of the period to see if
-                    systemic risk was rapidly rising (AR Shift > 1) and thus preceded the market fall''',
-                           style={'fontSize': '1.25rem', 'lineHeight': '200%'}),
-
-                    html.P('''The below interactive table shows the proportion of extreme market declines. For example,
-                    taking the worst 1% of one-day market returns in the in-sample period from 1998-2010 yields
-                    32 observations. Of those 32 declines, systemic risk was rapidly rising (AR Shift > 1) in 24 of
-                    those cases (75%). Using monthly returns, the worst 1% of cases were preceded by rising systemic
-                    risk 84% of the time.''',
-                           style={'fontSize': '1.25rem', 'lineHeight': '200%'}),
-
-                html.P('''Performance generally declines out-of-sample however using the period from 1972 to 2020. The
-                worst 1% of daily return periods were preceded by rising systemic risk in 58% of the cases and the worst
-                1% of monthly returns was preceded by rising systemic risk in only 41% of the cases.''',
-                       style={'fontSize': '1.25rem', 'lineHeight': '200%'}),
-
-            ], className='multi-column', style={'lineHeight': '200%', 'fontSize': '1.25rem'}),
-
-            html.Br(),
-            html.Br(),
-
-            dcc.Dropdown(id='figure3-input',
-                         options=[{'label': 'In-Sample (1998-2010)', 'value': 'in_sample'},
-                                  {'label': 'Out-of-Sample (1972-2020)', 'value': 'out_of_sample'}],
-                         value='in_sample',
-                         style={'width': '50%'}),
-
-            html.Br(),
-            html.Br(),
-
             dbc.Row([
 
                 dbc.Col([
 
-                    html.H4('''Figure 3: Percent of Worst Market Declines That Were Preceded by Rising Systemic Risk''',
+                    html.P('''We identified the periods with the worst returns. For example October 19, 1987 "Black
+                       Monday" was the worst one-day return (-20%) and March 23, 2020 was the worst trailing one-month
+                       return (-33%). For each of those periods we took the AR Shift at the start of the period to see if
+                       systemic risk was rapidly rising (AR Shift > 1) and thus preceded the market fall''',
+                           style={'fontSize': '1.25rem', 'lineHeight': '200%'}),
+
+                    html.Br(),
+
+                    html.H4(
+                        '''Figure 3: Percent of Worst Market Declines That Were Preceded by Rising Systemic Risk''',
                         style={'text-align': 'left', 'margin-bottom': '0%'}),
+
+                    html.Br(),
+
+                    dcc.Dropdown(id='figure3-input',
+                                 options=[{'label': 'In-Sample (1998-2010)', 'value': 'in_sample'},
+                                          {'label': 'Out-of-Sample (1972-2020)', 'value': 'out_of_sample'}],
+                                 value='in_sample',
+                                 style={'width': '100%'}),
 
                     html.Br(),
 
@@ -385,20 +381,52 @@ def serve_layout():
                     html.Div(id='figure3-footnote',
                              style={'fontSize': '12px'}),
 
-                    html.Br(),
-                    html.Br(),
+                ], width=6),
 
-                    html.H4('''Figure 4: AR Shift Levels and Stock Market Index Levels''',
+                dbc.Col([
+
+                    html.P('''The adjacent table shows the proportion of extreme market declines. For example,
+                                    taking the worst 1% of one-day market returns in the in-sample period from 1998-2010 yields
+                                    32 observations. Of those 32 declines, systemic risk was rapidly rising (AR Shift > 1) in 24 of
+                                    those cases (75%). Using monthly returns, the worst 1% of cases were preceded by rising systemic
+                                    risk 84% of the time.''',
+                           style={'fontSize': '1.25rem', 'lineHeight': '200%'}),
+
+                    html.P('''Performance generally declines out-of-sample however using the period from 1972 to 2020. The
+                    worst 1% of daily return periods were preceded by rising systemic risk in 58% of the cases and the worst
+                    1% of monthly returns was preceded by rising systemic risk in only 41% of the cases.''',
+                           style={'fontSize': '1.25rem', 'lineHeight': '200%'}),
+
+
+                ], width=6)
+
+            ]),
+
+
+
+            html.Br(),
+            html.Br(),
+
+            html.Div(['''''']),
+
+
+            html.Br(),
+            html.Br(),
+
+            dbc.Row([
+
+                dbc.Col([
+
+                    html.H4('''Figure 5: Worst Market Declines''',
                             style={'text-align': 'left', 'margin-bottom': '0%'}),
-
-
 
                 ], width=6),
 
                 dbc.Col([
 
-                    html.H4('''Figure 5: Worst Market Declines''',
-                        style={'text-align': 'left', 'margin-bottom': '0%'}),
+                    html.H4('''Figure 4: AR Shift Levels and Stock Market Index Levels''',
+                            style={'text-align': 'left', 'margin-bottom': '0%'}),
+
 
                     html.Div(id='figure4')
 
@@ -454,7 +482,7 @@ def update_theory_purpose(tab):
             ]
 
         layout={'height': 300,
-                'margin': {'t': 5, 'l': 20},}
+                'margin': {'t': 5, 'l': 40, 'b': 40},}
 
         high_fig = {'data': high_data, 'layout': layout}
         low_fig = {'data': low_data, 'layout': layout}
@@ -492,24 +520,36 @@ def update_theory_purpose(tab):
 
                 dbc.Col([
 
-                    html.H4('''A Period of High Systemic Risk'''),
+                    html.Div([
 
-                    dcc.Graph(figure=high_fig),
+                        html.H4('''A Period of High Systemic Risk''', style={'backgroundColor': '#267B83',
+                                                                             'color': 'white',
+                                                                             'paddingLeft': '10px'}),
 
-                    html.Div('''Oil, Telecom and Utilities follow the same trend. Autos does as well but with higher
-                    "beta" post March 2009. The average pair-wise correlation of these sectors is 68%.''',
-                             style={'fontSize': '16px'}),
+                        dcc.Graph(figure=high_fig),
+
+                        html.Div('''Oil, Telecom and Utilities follow the same trend. Autos does as well but with higher
+                        "beta" post March 2009. The average pair-wise correlation of these sectors is 68%.''',
+                                 style={'fontSize': '14px', 'marginLeft': '2%', 'marginRight': '2%'}),
+
+                    ], style={'border': '2px solid #267B83'}),
 
                 ], width=6),
 
                 dbc.Col([
 
-                    html.H4('''... Versus a Period of Low Systemic Risk'''),
+                    html.Div([
 
-                    dcc.Graph(figure=low_fig),
+                        html.H4('''... Versus a Period of Low Systemic Risk''', style={'backgroundColor': '#267B83',
+                                                                                       'color': 'white',
+                                                                                       'paddingLeft': '10px'}),
 
-                    html.Div('''The five sectors show greater idiosyncracies and do not more together. The average
-                    pair-wise correlation over the period is 44%.''', style={'fontSize': '16px'}),
+                        dcc.Graph(figure=low_fig),
+
+                        html.Div('''The five sectors show greater idiosyncracies and do not more together. The average
+                        pair-wise correlation over the period is 44%.''', style={'fontSize': '14px', 'marginLeft': '2%', 'marginRight': '2%'}),
+
+                    ], style={'border': '2px solid #267B83'})
 
                 ], width=6),
 
@@ -537,7 +577,7 @@ def update_theory_purpose(tab):
         ]
 
         cum_variance_layout = {'height': 400,
-               'margin': {'t': 5, 'l': 20},
+               'margin': {'t': 5, 'l': 40, 'b': 40},
                'yaxis': {'range': [0.0, 1.0]}
                                }
 
@@ -594,24 +634,36 @@ def update_theory_purpose(tab):
 
                 dbc.Col([
 
-                    html.H4('''Cumulative Proportion of Total Variance Explained by PCs'''),
+                    html.Div([
 
-                    dcc.Graph(figure=cum_variance_fig),
+                        html.H4('''Cumulative Proportion of Total Variance Explained by PCs''', style={'backgroundColor': '#267B83',
+                                                                                           'color': 'white',
+                                                                                           'paddingLeft': '10px'}),
 
-                    html.Div('''The first principal component explains a large fraction of the total variance and has
-                     historically averaged around 60%. The next nine principal components then explain an average of 20%
-                     more of the total variance.''', style={'fontSize': '16px'}),
+                        dcc.Graph(figure=cum_variance_fig),
+
+                        html.Div('''The first principal component explains a large fraction of the total variance and has
+                         historically averaged around 60%. The next nine principal components then explain an average of 20%
+                         more of the total variance.''', style={'fontSize': '14px', 'marginLeft': '2%', 'marginRight': '2%'}),
+
+                    ], style={'border': '2px solid #267B83'}),
 
                 ], width=6),
 
                 dbc.Col([
 
-                    html.H4('''Weighted vs Unweighted Variance'''),
+                    html.Div([
 
-                    dcc.Graph(figure=weighted_fig),
+                        html.H4('''Weighted vs Unweighted Variance''', style={'backgroundColor': '#267B83',
+                                                                                           'color': 'white',
+                                                                                           'paddingLeft': '10px'}),
 
-                    html.Div('''Using the weighted variance provides more timely responses to rapid spikes or drops
-                    in the systemic risk measure.''', style={'fontSize': '16px'})
+                        dcc.Graph(figure=weighted_fig),
+
+                        html.Div('''Using the weighted variance provides more timely responses to rapid spikes or drops
+                        in the systemic risk measure.''', style={'fontSize': '14px', 'marginLeft': '2%', 'marginRight': '2%'})
+
+                    ], style={'border': '2px solid #267B83'})
 
                 ], width=6)
 
@@ -774,9 +826,9 @@ def update_figure3(in_sample):
          'textAlign': 'center'} for i in ['Period', '1%', '2%', '5%']
     ]
 
-    footnote = '''N = 32, 63, 156 for Daily, Weekly, Monthly periods, respectively'''
+    footnote = '''N = 32, 63, 156 for worst 1%, 2%, 5% of periods, respectively'''
     if in_sample == False:
-        footnote = '''N = 123, 245, 612 for Daily, Weekly, Monthly periods, respectively'''
+        footnote = '''N = 123, 245, 612 for worst 1%, 2%, 5% of periods, respectively'''
 
     return dt.DataTable(id = 'table',
                         columns=cols,
