@@ -86,7 +86,7 @@ def serve_layout():
     ar_data = [{'x': ar['date'],
                 'y': ar['ar'],
                 'type': 'line_markers',
-                'marker': {'color': '#26BE81'},
+                'line': {'color': '#26BE81', 'width': 3},
                 }]
     ar_layout={'height': 400,
                'margin': {'t': 5, 'l': 40, 'b': 40},
@@ -116,7 +116,7 @@ def serve_layout():
     ar_shift_data = [{'x': ar_shift['date'],
                 'y': ar_shift['ar_shift'],
                 'type': 'line_markers',
-                'marker': {'color': '#26BE81'},
+                'line': {'color': '#26BE81', 'width': 3},
                 },]
 
     ar_shift_layout = {'height': 400,
@@ -127,6 +127,17 @@ def serve_layout():
 
     ar_shift_fig = {'data': ar_shift_data, 'layout': ar_shift_layout, }
 
+
+    figure4_cols = [{'name': 'Rank', 'id': 'Rank'},
+            {'name': 'Date', 'id': 'Date'},
+            {'name': 'Return', 'id': 'Return', 'type': 'numeric', 'format': FormatTemplate.percentage(1)},
+            {'name': 'AR', 'id': 'AR', 'type': 'numeric'},
+            {'name': 'AR Shift', 'id': 'AR Shift', 'type': 'numeric'}]
+
+    figure4_style_cell_conditional = [
+        {'if': {'column_id': i},
+         'textAlign': 'center'} for i in ['Rank', 'Date', 'Return', 'AR', 'AR Shift']
+    ]
 
     return [
         html.Div([
@@ -362,24 +373,32 @@ def serve_layout():
 
                     html.Br(),
 
-                    html.H4(
-                        '''Figure 3: Percent of Worst Market Declines That Were Preceded by Rising Systemic Risk''',
-                        style={'text-align': 'left', 'margin-bottom': '0%'}),
+                    html.Div([
 
-                    html.Br(),
+                        html.H4(
+                            '''Figure 3: Percent of Worst Market Declines That Were Preceded by Rising Systemic Risk''',
+                            style={'backgroundColor': '#267B83',
+                                   'color': 'white',
+                                   'paddingLeft': '10px'}),
 
-                    dcc.Dropdown(id='figure3-input',
-                                 options=[{'label': 'In-Sample (1998-2010)', 'value': 'in_sample'},
-                                          {'label': 'Out-of-Sample (1972-2020)', 'value': 'out_of_sample'}],
-                                 value='in_sample',
-                                 style={'width': '100%'}),
+                        html.Br(),
 
-                    html.Br(),
+                        dcc.Dropdown(id='figure3-input',
+                                     options=[{'label': 'In-Sample (1998-2010)', 'value': 'in_sample'},
+                                              {'label': 'Out-of-Sample (1972-2020)', 'value': 'out_of_sample'}],
+                                     value='in_sample',
+                                     style={'width': '80%', 'marginLeft': '2%'}),
 
-                    html.Div(id='figure3'),
+                        html.Br(),
 
-                    html.Div(id='figure3-footnote',
-                             style={'fontSize': '12px'}),
+                        html.Div(id='figure3', style={'marginLeft': '4%', 'marginRight': '4%'}),
+
+                        html.Br(),
+
+                        html.Div(id='figure3-footnote',
+                                 style={'fontSize': '14px', 'marginLeft': '2%', 'marginRight': '2%'}),
+
+                    ], style={'border': '2px solid #267B83'})
 
                 ], width=6),
 
@@ -407,37 +426,104 @@ def serve_layout():
             html.Br(),
             html.Br(),
 
-            html.Div(['''''']),
+            html.Div([
+
+                html.H4(
+                    '''Figure 4: Worst Market Declines and AR Shift Values''',
+                    style={'backgroundColor': '#267B83',
+                           'color': 'white',
+                           'paddingLeft': '10px'}),
+
+                html.Br(),
+
+                dbc.Row([
+
+                    dbc.Col([
+
+                        dcc.Dropdown(id='figure4-input1',
+                                     options=[{'label': 'In-Sample (1998-2010)', 'value': 'in_sample'},
+                                              {'label': 'Out-of-Sample (1972-2020)', 'value': 'out_of_sample'}],
+                                     value='in_sample',
+                                     style={'marginLeft': '2%'}),
+
+                    ], width=4),
+
+                    dbc.Col([
+
+                        dcc.Dropdown(id='figure4-input2',
+                                    options=[{'label': 'Daily Returns', 'value': 'daily'},
+                                             {'label': 'Weekly Returns', 'value': 'weekly'},
+                                             {'label': 'Monthly Returns', 'value': 'monthly'},],
+                                    value='daily',
+                                    style={'marginLeft': '2%'}),
+
+                    ], width=4)
+
+                ], ),
+
+                html.Br(),
+
+                dbc.Row([
+
+
+                    dbc.Col([
+
+                        html.Div([
+
+                            # css argument below: see https://github.com/facultyai/dash-bootstrap-components/issues/334
+                            dt.DataTable(id='figure4-table',
+                                         columns=figure4_cols,
+                                         css=[{'selector': '.row', 'rule': 'margin: 0'}],
+                                         # necessary because selectors getting cut off
+                                         fixed_rows={'headers': True},
+                                         merge_duplicate_headers=True,
+                                         row_selectable='single',
+                                         selected_rows=[0],
+                                         style_cell_conditional=figure4_style_cell_conditional,
+                                         style_header={'background_color': '#267B83', 'border': '0px',
+                                                       'color': 'white'},
+                                         style_data={},
+                                         style_as_list_view=True,
+                                         style_table={'height': 400, 'overflowY': 'auto'}
+                                         ),
+
+                            dcc.Store(id='worst-returns-data'),
+
+
+                        ], style={'marginLeft': '4%', 'marginRight': '4%'}),
+
+                    ], width=6),
+
+                    dbc.Col([
+
+                        html.H5('''S&P500 and AR Shift Levels''', style={'backgroundColor': '#267B83',
+                                               'color': 'white',
+                                               'paddingLeft': '10px'}),
+
+                        html.Div(id='figure4a'),
+
+
+                    ], width=6),
+
+                ]),
+
+                html.Br(),
+
+
+            ], style={'border': '2px solid #267B83'}),
 
 
             html.Br(),
             html.Br(),
 
-            dbc.Row([
-
-                dbc.Col([
-
-                    html.H4('''Figure 5: Worst Market Declines''',
-                            style={'text-align': 'left', 'margin-bottom': '0%'}),
-
-                ], width=6),
-
-                dbc.Col([
-
-                    html.H4('''Figure 4: AR Shift Levels and Stock Market Index Levels''',
-                            style={'text-align': 'left', 'margin-bottom': '0%'}),
-
-
-                    html.Div(id='figure4')
-
-                ], width=6),
-
-
-
-            ]),
+            html.Hr(style={'border': '1px solid grey'}),
 
             html.Br(),
             html.Br(),
+
+            html.H2('Key Result 3: Rising Systemic Risk was Followed by Worse Market Returns',
+                   style={'color': 'grey'}),
+            html.H5('''Our replication is in agreement''', style={'fontWeight': 'bold'}),
 
             html.Br(),
             html.Br(),
@@ -457,6 +543,8 @@ def serve_layout():
     ]
 
 layout = serve_layout
+
+
 
 @app.callback(dash.dependencies.Output(component_id='theory-purpose-content', component_property='children'),
               [dash.dependencies.Input(component_id='theory-purpose-tab', component_property='value')])
@@ -599,7 +687,7 @@ def update_theory_purpose(tab):
             ]
 
         weighted_layout = {'height': 300,
-                               'margin': {'t': 5, 'l': 20},
+                               'margin': {'t': 5, 'l': 40, 'b': 40},
                                'yaxis': {'range': [0.4, 1.0]}
                                }
 
@@ -835,4 +923,167 @@ def update_figure3(in_sample):
                         data= df.to_dict('records'),
                         merge_duplicate_headers=True,
                         style_cell_conditional=style_cell_conditional,
-                        style_header={'background_color': '#26BE81'}), footnote
+                        #style_header={'background_color': '#4b7275', 'border': '0px', 'color': 'white'},
+                        style_header={'background_color': '#267B83', 'border': '0px', 'color': 'white'},
+                        style_data={},
+                        style_as_list_view=True,), footnote
+
+
+@app.callback([dash.dependencies.Output(component_id='figure4-table', component_property='data'),
+               dash.dependencies.Output(component_id='worst-returns-data', component_property='data'),],
+              [dash.dependencies.Input(component_id='figure4-input1', component_property='value'),
+               dash.dependencies.Input(component_id='figure4-input2', component_property='value')])
+
+def update_figure4(in_sample, period):
+
+    in_sample = True if in_sample == 'in_sample' else False
+
+    worst_periods = pd.read_csv('data/absorption_ratio_worst_return_periods_list.csv')
+
+    # subset the data for the user specification
+    df = worst_periods.copy()
+    df = df[df['period'] == period]
+    df = df[df['in_sample'] == in_sample]
+    df = df[df['overlapping'] == True]
+    if in_sample:
+        df = df[df['rank'] >= 0.95]
+    else:
+        df = df[df['rank_oos'] >= 0.95]
+
+    df.sort_values(by='^GSPC', inplace=True, ascending=True)
+    df.reset_index(inplace=True, drop=True)
+    df['rank'] = df.index + 1
+
+    # set the columns to show in table
+    df.rename(columns={'rank': 'Rank', '^GSPC': 'Return', 'ar': 'AR', 'ar_shift': 'AR Shift', 'date': 'Date'}, inplace=True)
+    cols = [{'name': 'Rank', 'id': 'Rank'},
+            {'name': 'Date', 'id': 'Date'},
+            {'name': 'Return', 'id': 'Return', 'type': 'numeric', 'format': FormatTemplate.percentage(1)},
+            {'name': 'AR', 'id': 'AR', 'type': 'numeric'},
+            {'name': 'AR Shift', 'id': 'AR Shift', 'type': 'numeric'}]
+
+    # format to 2 decimals places for presentation
+    for var in ['AR', 'AR Shift']:
+        df[var] = df[var].map(lambda x: round(x,2))
+
+
+    return df.to_dict('records'), df.to_dict('records')
+
+
+@app.callback(dash.dependencies.Output(component_id='figure4a', component_property='children'),
+              [dash.dependencies.Input(component_id='figure4-input1', component_property='value'),
+               dash.dependencies.Input(component_id='figure4-input2', component_property='value'),
+               dash.dependencies.Input(component_id='worst-returns-data', component_property='data'),
+               dash.dependencies.Input(component_id='figure4-table', component_property='selected_rows')])
+def update_figure4_table(in_sample, period, data, selected_row):
+
+    '''
+
+    update the line chart that shows SP500 and AP behavior around a user selected date
+    '''
+
+
+    period_dict = {'daily': 60, 'weekly': 90, 'monthly': 120}
+    period_offset_dict = {'daily': 1, 'weekly': 7, 'monthly': 31}
+
+    # 0. get the use selected date
+    df = pd.DataFrame(data)
+    print('thing:', df.iloc[selected_row]['Date'].values[0])
+    this_date = pd.to_datetime(df.iloc[selected_row]['Date'].values[0])
+    print('this_date:', this_date)
+
+    # 1. SP500 DATA
+    # get sp500 price (level) data
+    sp500 = pd.read_csv('data/sp500_levels.csv')
+    sp500['date'] = pd.to_datetime(sp500['date'])
+    sp500.set_index('date', inplace=True)
+    sp500.rename(columns={'^GSPC': 'S&P500'}, inplace=True)
+
+    # just include the period around the user selected date
+    # eg a few weeks prior and after the selected date for daily returns, a few months prior and
+    # after for monthly returns
+    sp500 = sp500[sp500.index >= (this_date - pd.Timedelta(days=period_dict[period]))]
+    sp500 = sp500[sp500.index <= (this_date + pd.Timedelta(days=period_dict[period]))]
+
+    decline = sp500[sp500.index <= this_date]
+    decline = decline[decline.index >= (this_date - pd.Timedelta(days=period_offset_dict[period]))]
+
+    # 2. AR SHIFT DATA
+    ar_shift = pd.read_csv('data/ar_shift.csv')
+    ar_shift['date'] = pd.to_datetime(ar_shift['date'])
+    ar_shift.set_index('date', inplace=True)
+
+    ar_shift = ar_shift[ar_shift.index >= (this_date - pd.Timedelta(days=period_dict[period]))]
+    ar_shift = ar_shift[ar_shift.index <= (this_date + pd.Timedelta(days=period_dict[period]))]
+    ar_shift.rename(columns={'ar_shift': 'AR Shift'}, inplace=True)
+
+    # 3. CHART PARAMETERS
+
+    shapes= [
+        {
+            'type': 'rect',
+            'x0': pd.to_datetime('2008-10-01'),
+            'y0': 0,
+            'x1': pd.to_datetime('2008-10-31'),
+            'y1': 1,
+            'xref': 'x',
+            'yref': 'paper',
+            'line': {'color': 'lightorange', 'width': 0},
+            'fillcolor': 'lightorange',
+            'opacity': 0.2,
+        }
+        ]
+
+    annotations = [
+        # {'x': this_date,
+        #  'y': sp500.loc[this_date]['S&P500'],
+        #  'text': '',
+        #  'font': {'color': 'red'},
+        #  },
+
+        {'x': this_date - pd.Timedelta(days=period_offset_dict[period]),
+         'y': ar_shift.loc[this_date - pd.Timedelta(days=period_offset_dict[period])]['AR Shift'],
+         'text': 'Start of Market Decline',
+         'font': {'color': 'black'},
+         'yref': 'y2'
+         },
+
+    ]
+
+    sp500_data = [{'x': sp500.index,
+                  'y': sp500['S&P500'],
+                  'name': 'S&P 500',
+                  'line': {'color': 'lightblue', 'width': 3},
+                  'type': 'line'},
+
+                  {'x': decline.index,
+                   'y': decline['S&P500'],
+                   'name': '',
+                   'line': {'color': '#8025BE', 'width': 3},
+                   'type': 'line',
+                   'showlegend': False},
+
+                  {'x': ar_shift.index,
+                   'y': ar_shift['AR Shift'],
+                   'name': 'AR Shift',
+                   'line': {'color': '#26BE81', 'width': 3},
+                   'type': 'line',
+                   'yaxis': 'y2'},
+
+
+
+                  ]
+    sp500_layout = {'height': 400,
+                    'legend': {
+                        'orientation': 'h'
+                    },
+                    'margin': {'t': 10, 'l': 40, 'b': 40},
+                    'annotations': annotations,
+                    'shapes': shapes,
+                    'xaxis': {'anchor': 'y2'},
+                    'yaxis': {'domain': [0.55, 1]},
+                    'yaxis2': {'domain': [0, 0.45]}}
+    sp500_fig = {'data': sp500_data, 'layout': sp500_layout}
+
+
+    return dcc.Graph(figure=sp500_fig)
