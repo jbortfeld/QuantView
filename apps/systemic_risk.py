@@ -139,6 +139,45 @@ def serve_layout():
          'textAlign': 'center'} for i in ['Rank', 'Date', 'Return', 'AR', 'AR Shift']
     ]
 
+    # figure 5: Jumps and Falls in AR Shift
+    jump_dates = ar_shift[ar_shift['action'] == 1].date.tolist()
+    fall_dates = ar_shift[ar_shift['action'] == -1].date.tolist()
+
+    ar_shift_jump_annotations = [
+        {'x': d,
+         'y': get_ar_value_on_date(ar_shift_dict, pd.to_datetime(d)) + .1,
+         'text': '',
+         'font': {'color': 'red'},
+         'arrowcolor': '#ff8080',
+         'arrowsize': 2,
+         'arrowwidth': 2,
+         'arrowlength': 10,
+         'arrowhead': 4
+         } for d in jump_dates
+        ]
+
+    fall_annotations = [
+        {'x': d,
+         'y': get_ar_value_on_date(ar_shift_dict, pd.to_datetime(d)) + .1,
+         'text': '',
+         'font': {'color': 'blue'},
+         'arrowcolor': '#3366ff',
+         'arrowsize': 2,
+         'arrowwidth': 2,
+         'arrowlength': 10,
+         'arrowhead': 4
+         } for d in fall_dates]
+
+    ar_shift_jump_annotations = ar_shift_jump_annotations + fall_annotations
+
+    figure5_fig= {'data': ar_shift_data,
+                      'layout': {'height': 400,
+                           'margin': {'t': 5, 'l': 40, 'b': 40},
+                            'annotations': ar_shift_jump_annotations
+                            }
+                 }
+
+
     return [
         html.Div([
 
@@ -527,10 +566,112 @@ def serve_layout():
 
             html.Br(),
             html.Br(),
+
+            html.Div([
+
+                html.P('''In contrast to the above section, where we asked if large market crashes were preceded by
+                any signal from the AR indicator, we now ask if large jumps or falls in the AR indicator are then
+                followed by large market gains or losses. '''),
+
+                html.P('''To do this we identified the dates when the AR Shift indicator crossed above +1 from a
+                prior value that was below +1. These dates, which signify that systemic risk is rapidly increasing
+                from its prior levels, can be identified in the below figure and marked by the red arrows. '''),
+
+                html.P('''We also identified the dates when the AR Shift first crossed below -1, indicating sudden
+                falls in systemic risk and marked by the blue arrows in the chart. '''),
+
+            ], className='multi-column', style={'fontSize': '1.25rem', 'lineHeight': '200%'}),
+
             html.Br(),
             html.Br(),
+
+            html.Div([
+
+                html.H4(
+                    '''Figure 5: Trade Timing Based on AR Shift Jumps''',
+                    style={'backgroundColor': '#267B83',
+                           'color': 'white',
+                           'paddingLeft': '10px'}),
+
+                dcc.Graph(figure=figure5_fig),
+
+                html.Div('''Users can zoom into the above chart by hovering over the chart and then clicking the "+"
+                or "-" buttons in the top right and center the chart by dragging on the chart.''',
+                         style={'fontSize': '14px', 'marginLeft': '2%', 'marginRight': '2%'}),
+
+            ], style={'border': '2px solid #267B83'}),
+
             html.Br(),
             html.Br(),
+
+            dbc.Row([
+
+                dbc.Col([
+
+                    html.P('''Over the in-sample period the average 1-month return following a spike in
+                    systemic risk was -1.1% versus an average return of 2.3% following a drop in systemic risk
+                    (and an average return of 0.71% on an unconditional basis). Out-of-sample, the performance following
+                    a decline in systemic risk similarly outperformed cases following a rise in systemic risk.''',
+                    style={'fontSize': '1.25rem', 'lineHeight': '200%'}),
+
+                    html.P('''The number of times that the AR Shift metric crossed through +1 or -1 however are
+                    relatively low, even out-of-sample. Furthermore the differences in means is not statistically
+                    significant.''',
+                       style={'fontSize': '1.25rem', 'lineHeight': '200%'})
+
+                ], width=6),
+
+                dbc.Col([
+
+                    html.Div([
+
+                        html.H4(
+                            '''Figure 6: Average Returns Following AR Shift Jumps''',
+                            style={'backgroundColor': '#267B83',
+                                   'color': 'white',
+                                   'paddingLeft': '10px'}),
+
+                        html.Br(),
+
+                        dbc.Row([
+
+                            dbc.Col([
+
+                                dcc.Dropdown(id='figure6-input1',
+                                             options=[{'label': 'In-Sample (1998-2010)', 'value': 'in_sample'},
+                                                      {'label': 'Out-of-Sample (1972-2020)', 'value': 'out_of_sample'}],
+                                             value='in_sample',
+                                             style={'marginLeft': '2%'}),
+
+                            ], width=6),
+
+                            dbc.Col([
+
+                                dcc.Dropdown(id='figure6-input2',
+                                             options=[{'label': 'Mean Returns', 'value': 'mean'},
+                                                      {'label': 'Annualized Mean Returns', 'value': 'annualized_mean'}],
+                                             value='mean',
+                                             style={'marginLeft': '2%'}),
+
+                            ], width=5),
+
+                        ]),
+
+                        html.Br(),
+
+                        html.Div(id='figure6', style={'marginLeft': '4%', 'marginRight': '4%'}),
+
+                        html.Br(),
+
+                    ], style={'border': '2px solid #267B83'}),
+
+                ], width=6),
+
+
+
+
+            ]),
+
             html.Br(),
             html.Br(),
             html.Br(),
@@ -664,7 +805,7 @@ def update_theory_purpose(tab):
              'market': {'color': 'red'}} for pc in ['ar', 'ar9', 'ar8', 'ar7', 'ar6', 'ar5', 'ar4', 'ar3', 'ar2', 'ar1']
         ]
 
-        cum_variance_layout = {'height': 400,
+        cum_variance_layout = {'height': 300,
                'margin': {'t': 5, 'l': 40, 'b': 40},
                'yaxis': {'range': [0.0, 1.0]}
                                }
@@ -1087,3 +1228,55 @@ def update_figure4_table(in_sample, period, data, selected_row):
 
 
     return dcc.Graph(figure=sp500_fig)
+
+
+@app.callback(dash.dependencies.Output(component_id='figure6', component_property='children'),
+              [dash.dependencies.Input(component_id='figure6-input1', component_property='value'),
+               dash.dependencies.Input(component_id='figure6-input2', component_property='value'),
+               ])
+def update_figure6_table(in_sample, metric):
+
+    in_sample = True if in_sample == 'in_sample' else False
+    df = pd.read_csv('data/ar_forward_returns.csv')
+
+    def reformat_for_display(df, in_sample, metric):
+
+        temp = df[df['in_sample'] == in_sample]
+        temp = temp[temp['metric'] == metric]
+        temp = temp.T
+        temp.columns = temp.loc['forward_days']
+        temp = temp.loc[['increasing', 'all', 'decreasing']]
+        temp.reset_index(inplace=True, drop=False)
+        temp.rename(columns={'index': '', 1: '1D', 5: '1W', 21: '1M'}, inplace=True)
+        return temp
+
+
+    def build_returns_and_counts(df, in_sample, metric):
+        counts = reformat_for_display(df, in_sample=in_sample, metric='count')['1D']
+        returns = reformat_for_display(df, in_sample=in_sample, metric=metric)
+        returns['Count'] = counts
+        return returns
+
+
+    table = build_returns_and_counts(df, in_sample, metric)
+    cols = [{'name': ['', ''], 'id': ''},
+            {'name': ['', 'Count'], 'id': 'Count', 'type': 'numeric',},
+            {'name': ['Forward Return', '1D'], 'id': '1D', 'type': 'numeric', 'format': FormatTemplate.percentage(1)},
+            {'name': ['Forward Return', '1W'], 'id': '1W', 'type': 'numeric', 'format': FormatTemplate.percentage(1)},
+            {'name': ['Forward Return', '1M'], 'id': '1M', 'type': 'numeric', 'format': FormatTemplate.percentage(1)},]
+
+
+    style_cell_conditional = [
+        {'if': {'column_id': i},
+         'textAlign': 'center'} for i in ['', 'Count', '1D', '1W', '1M']
+        ]
+
+    return dt.DataTable(id='figure6-table',
+                        columns=cols,
+                        data=table.to_dict('records'),
+                        merge_duplicate_headers=True,
+                        style_cell_conditional=style_cell_conditional,
+                        # style_header={'background_color': '#4b7275', 'border': '0px', 'color': 'white'},
+                        style_header={'background_color': '#267B83', 'border': '0px', 'color': 'white'},
+                        style_data={},
+                        style_as_list_view=True, )
