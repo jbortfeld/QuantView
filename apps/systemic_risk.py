@@ -667,12 +667,67 @@ def serve_layout():
 
                 ], width=6),
 
-
-
-
             ]),
 
             html.Br(),
+
+            html.Div([
+
+                html.H4(
+                    '''Figure 7: AR Shift Jumps and Subsequent Market Returns''',
+                    style={'backgroundColor': '#267B83',
+                           'color': 'white',
+                           'paddingLeft': '10px'}),
+
+                html.Br(),
+
+                dbc.Row([
+
+                    dbc.Col([
+
+                        dcc.Dropdown(id='figure7-input1',
+                                     options=[{'label': 'In-Sample (1998-2010)', 'value': 'in_sample'},
+                                              {'label': 'Out-of-Sample (1972-2020)', 'value': 'out_of_sample'}],
+                                     value='in_sample',
+                                     style={'marginLeft': '2%'}),
+
+                    ], width=4),
+
+                    dbc.Col([
+
+                        dcc.Dropdown(id='figure7-input2',
+                                     options=[{'label': 'Increasing Risk', 'value': 'increasing'},
+                                              {'label': 'Decreasing Risk', 'value': 'decreasing'}],
+                                     value='increasing',
+                                     style={'marginLeft': '2%'}),
+
+                    ], width=4),
+
+                ]),
+
+                html.Br(),
+
+                dbc.Row([
+
+                    dbc.Col([
+
+                        html.Div(id='figure7-table', style={'marginLeft': '4%', 'marginRight': '4%'})
+
+                    ], width=6),
+
+                    dbc.Col([
+
+                        html.Div(id='figure7-chart')
+
+                    ], width=6)
+
+
+                ]),
+
+                html.Br(),
+
+            ], style={'border': '2px solid #267B83'}),
+
             html.Br(),
             html.Br(),
             html.Br(),
@@ -1129,9 +1184,7 @@ def update_figure4_table(in_sample, period, data, selected_row):
 
     # 0. get the use selected date
     df = pd.DataFrame(data)
-    print('thing:', df.iloc[selected_row]['Date'].values[0])
     this_date = pd.to_datetime(df.iloc[selected_row]['Date'].values[0])
-    print('this_date:', this_date)
 
     # 1. SP500 DATA
     # get sp500 price (level) data
@@ -1280,3 +1333,103 @@ def update_figure6_table(in_sample, metric):
                         style_header={'background_color': '#267B83', 'border': '0px', 'color': 'white'},
                         style_data={},
                         style_as_list_view=True, )
+
+
+@app.callback([dash.dependencies.Output(component_id='figure7-table', component_property='children'),
+               dash.dependencies.Output(component_id='figure7-chart', component_property='children'),],
+              [dash.dependencies.Input(component_id='figure7-input1', component_property='value'),
+               dash.dependencies.Input(component_id='figure7-input2', component_property='value'),
+               ])
+
+def update_figure7(in_sample, group):
+
+    in_sample = True if in_sample == 'in_sample' else False
+
+    if in_sample & (group == 'increasing'):
+        file = 'increasing'
+    elif in_sample & (group == 'decreasing'):
+        file = 'decreasing'
+    elif group == 'increasing':
+        file = 'oos_increasing'
+    elif group == 'decreasing':
+        file = 'oos_decreasing'
+
+    df = pd.read_csv('data/ar_event_{}_analysis.csv'.format(file))
+    df.set_index('relative_date', inplace=True)
+    dates = [d[:10] for d in df.columns.tolist()]
+    df.columns = dates
+
+    # event analysis table
+    table_df = df[df.index.isin([1,5,21])].copy()
+    table_df = table_df.T
+    table_df.reset_index(inplace=True, drop=False)
+    table_df.rename(columns={'index': 'date'}, inplace=True)
+
+    ar_shift = pd.read_csv('data/ar_shift.csv')
+    ar_shift = ar_shift[['date', 'ar', 'ar_shift']].copy()
+    table_df = table_df.merge(ar_shift, how='left', on='date')
+    for col in [1,5,21]:
+        table_df[col] = table_df[col] / 100 - 1
+
+    table_cols = [{'name': 'Date', 'id': 'date'},
+                  {'name': 'AR', 'id': 'ar'},
+                  {'name': 'AR Shift', 'id': 'ar_shift'},
+                  {'name': '1D', 'id': '1', 'type': 'numeric', 'format': FormatTemplate.percentage(1)},
+                  {'name': '1W', 'id': '5', 'type': 'numeric', 'format': FormatTemplate.percentage(1)},
+                  {'name': '1M', 'id': '21', 'type': 'numeric', 'format': FormatTemplate.percentage(1)},
+                  ]
+
+    for var in ['ar', 'ar_shift']:
+        table_df[var] = table_df[var].map(lambda x: round(x,2))
+
+    style_cell_conditional = [
+        {'if': {'column_id': i},
+         'textAlign': 'center'} for i in ['date', 'ar', 'ar_shift', '1', '5', '21']
+        ]
+
+
+    datatable = dt.DataTable(columns=table_cols,
+                             data=table_df.to_dict('records'),
+                             style_header={'background_color': '#267B83', 'border': '0px', 'color': 'white'},
+                             style_cell_conditional=style_cell_conditional,
+                             style_data={},
+                             style_as_list_view=True,
+                             )
+
+
+    # event analysis chart
+    colors = lambda x: '#26BE81' if x == 'avg' else 'lightblue'
+    widths = lambda x: 3 if x == 'avg' else 2
+    opacities = lambda x: 0.8 if x == 'avg' else 0.4
+
+    chart_data = [{'x': df.index,
+                   'y': df[d],
+                   'name': d,
+                   'type': 'line',
+                   'line': {'color': colors(d), 'width': widths(d)},
+                   'opacity': opacities(d),
+                   'showlegend': False,
+                   } for d in df.columns]
+
+    layout = {'height': 400,
+              'margin': {'t': 10, 'l': 40, 'b': 40}
+              }
+
+    fig = {'data': chart_data,
+           'layout': layout}
+
+    return datatable, [
+
+        html.H4('''Event Analysis Around AR Jumps''', style={'backgroundColor': '#267B83',
+                                                             'color': 'white',
+                                                             'paddingLeft': '10px'}),
+
+        dcc.Graph(id='figure7-chart2',
+                  figure=fig),
+
+        html.Div('''Light blue lines indicate a historical returns t days before and after an AR jump.
+        Green line shows the average across all cases. Returns have been indexed to 100 at t=0.''',
+                 style={'fontSize': '14px', 'marginLeft': '2%', 'marginRight': '2%'})
+
+
+    ]
