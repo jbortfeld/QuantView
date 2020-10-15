@@ -219,11 +219,6 @@ def serve_layout():
                     html.Br(),
                     html.Br(),
 
-                    html.Div('About QuantViews Pro'),
-                    html.Br(),
-
-                    html.Div('Last Updated:'),
-                    html.Div('June 2020',style={'margin-left': '20px'})
 
                 ], width=4, style={'color': 'black', 'text-align': 'left', 'fontSize': '1.25rem'})
 
@@ -727,6 +722,21 @@ def serve_layout():
                 html.Br(),
 
             ], style={'border': '2px solid #267B83'}),
+
+            html.Br(),
+            html.Br(),
+
+            html.Hr(style={'border': '1px solid grey'}),
+
+            html.Br(),
+            html.Br(),
+
+            # html.H2('Key Result 4: A Market-timing Strategy Based on Systemic Risk Trends is Effective',
+            #         style={'color': 'grey'}),
+            # html.H5('''Our replication is in agreement''', style={'fontWeight': 'bold'}),
+            #
+            # html.Br(),
+            # html.Br(),
 
             html.Br(),
             html.Br(),
@@ -1371,12 +1381,12 @@ def update_figure7(in_sample, group):
     for col in [1,5,21]:
         table_df[col] = table_df[col] / 100 - 1
 
-    table_cols = [{'name': 'Date', 'id': 'date'},
-                  {'name': 'AR', 'id': 'ar'},
-                  {'name': 'AR Shift', 'id': 'ar_shift'},
-                  {'name': '1D', 'id': '1', 'type': 'numeric', 'format': FormatTemplate.percentage(1)},
-                  {'name': '1W', 'id': '5', 'type': 'numeric', 'format': FormatTemplate.percentage(1)},
-                  {'name': '1M', 'id': '21', 'type': 'numeric', 'format': FormatTemplate.percentage(1)},
+    table_cols = [{'name': ['', 'Date'], 'id': 'date'},
+                  {'name': ['', 'AR'], 'id': 'ar'},
+                  {'name': ['', 'AR Shift'], 'id': 'ar_shift'},
+                  {'name': ['Forward Return', '1D'], 'id': '1', 'type': 'numeric', 'format': FormatTemplate.percentage(1)},
+                  {'name': ['Forward Return', '1W'], 'id': '5', 'type': 'numeric', 'format': FormatTemplate.percentage(1)},
+                  {'name': ['Forward Return', '1M'], 'id': '21', 'type': 'numeric', 'format': FormatTemplate.percentage(1)},
                   ]
 
     for var in ['ar', 'ar_shift']:
@@ -1390,6 +1400,7 @@ def update_figure7(in_sample, group):
 
     datatable = dt.DataTable(columns=table_cols,
                              data=table_df.to_dict('records'),
+                             merge_duplicate_headers=True,
                              style_header={'background_color': '#267B83', 'border': '0px', 'color': 'white'},
                              style_cell_conditional=style_cell_conditional,
                              style_data={},

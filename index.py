@@ -12,25 +12,13 @@ import config
 from app import app
 from app import server
 from apps import nav_bar
-from apps import home
+from apps import retirement_easy
+from apps import homepage
 from apps import functions
 from apps import about
 from apps import systemic_risk
 
 
-# APP HEADER
-# this will appear as the header of every page of the app
-
-# this_page_header = html.Div([
-#
-#     dbc.NavbarSimple([
-#     # website header
-#     html.Img(src='/logo.png',
-#     alt='quant views logo',
-#     style={'height': '90px'}),
-#     ])
-#
-# ])
 
 
 PLOTLY_LOGO = "https://images.plot.ly/logo/new-branding/plotly-logomark.png"
@@ -48,43 +36,6 @@ search_bar = dbc.Row(
     align="center",
 )
 
-# this_page_header = dbc.Navbar(
-#     [
-
-#         html.Div(
-#             # Use row and col to control vertical alignment of logo / brand
-#             dbc.Row(
-#                 [
-#                     dbc.Col(html.Img(src='/logo.png', height="80px")),
-#                     #dbc.Col(dbc.NavbarBrand("Navbar", className="ml-2")),
-#                     #dbc.Col(html.Div('ABOUT')),
-#                     # dbc.Col(html.Div('FAQ')),
-#                     # dbc.Col(html.Div('CONTACT')),
-#                 ],
-#                 align="center",
-#                 no_gutters=True,
-#             )
-#         ),
-#         dbc.Col(html.Div('BLOG')),
-#         dbc.Col(html.Div('ABOUT')),
-#         # dbc.NavbarToggler(id="navbar-toggler"),
-#         # dbc.Colla[pse(search_bar, id="navbar-collapse", navbar=True),
-#     ],
-#     color="#2FC086",
-#     dark=True,
-# )
-
-# this_page_header = dbc.NavbarSimple([
-
-#     dbc.Row([
-#         dbc.Col(html.Div('BLOG'), width=4, style={'color': 'white'}),
-#         dbc.Col(html.Div('ABOUT'), width=4, style={'color': 'white'}),
-#         dbc.Col(html.Div('DISCLAIMER'), width=4, style={'color': 'white'}),
-#         ])
-
-
-#     ],brand='hello', color="#2FC086", dark=True, style={'border': '2px solid blue'})
-
 blog_address='https://medium.com/@jbortfeld/an-easy-app-for-retirement-planning-59dcf37be97'
 
 this_page_header = dbc.Row([
@@ -94,10 +45,6 @@ this_page_header = dbc.Row([
                 , href='/')
         , width=10, style={'margin': '10px'}),
         dbc.Col(
-            html.A('BLOG', href=blog_address, 
-                target="_blank", 
-                style={'color': 'white', 'font-weight': 'bold'})
-            ,  style={'vertical-align': 'middle', 'margin': 'auto'}
         ),
         dbc.Col(
             html.A('ABOUT', href='/about', 
@@ -124,11 +71,9 @@ app.layout = html.Div([
               [dash.dependencies.Input('url', 'pathname')])
 def display_page(pathname):
     if pathname == '/':
-        return home.layout()
-    # if pathname == '/recession_paths':
-    #     return recession_paths.layout()
-    # if pathname == '/markets_in_rear_view':
-    #     return markets_in_rear_view.layout()
+        return homepage.layout()
+    elif pathname == '/retirement-planning-in-easy-mode':
+        return retirement_easy.layout()
     elif pathname == '/about':
         return about.layout()
     elif pathname == '/systemic-risk':
