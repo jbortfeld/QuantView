@@ -17,7 +17,7 @@ from apps import homepage
 from apps import functions
 from apps import about
 from apps import systemic_risk
-
+from apps import schelling_segregation
 
 
 
@@ -63,8 +63,8 @@ app.layout = html.Div([
     html.Div(id='page-content', className='body')
 
 ], style = {'backgroundColor': config.colors['background'],
-            'margin': -10,
-            'padding': 10})
+            'margin': 0,
+            'padding': 0})
 
 
 @app.callback(dash.dependencies.Output('page-content', 'children'),
@@ -78,6 +78,8 @@ def display_page(pathname):
         return about.layout()
     elif pathname == '/systemic-risk':
         return systemic_risk.layout()
+    elif pathname == '/schelling-segregation':
+        return schelling_segregation.layout()
     else:
         return '404'
 
