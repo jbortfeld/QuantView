@@ -314,7 +314,7 @@ def serve_layout():
             comprehensive overview of the complex social, political and economic dynamics. While computer scientists
             are able to contribute to the conversation, as will be demonstrated in this app, a serious discussion of
             this topic deserves a multidisciplinary approach with perspectives from historians, statisticians and
-            economists.'''),
+            economists.''', style={'background-color': 'lightyellow', 'border': '2px solid black', 'border-radius': '20px', 'padding': '6px'}),
 
             html.Br(),
 
@@ -335,6 +335,23 @@ def serve_layout():
             different variables in the analysis, within ABM it is preferable to construct a parsimonious model to
             show the minimum required assumptions that would be required to reproduce reality. '''),
 
+            html.Br(),
+
+            html.H3('''Simulation'''),
+
+            html.P('''To program our segregation simulation we model a simplified reality. We represent a city as a
+            2D grid, like a checkerboard, and each square in the grid represents a residence that can be occupied by
+            a household. Our course, real neighborhoods do not physically look like a crowded checkboard but we assume
+            that this simplification, amongst many assumptions we’ll make, is not material to the analysis.'''),
+
+            html.P('''Next we assume in our model that there are two types of households (say White and Asian or
+            Lannister and Targaryen) and that each household is primarily concerned about belonging to a neighborhood
+            filled with similar neighbors. To measure the similarity of a neighborhood for a given household, we define
+            a neighborhood as the adjacent houses within some radius and then calculate the proportion of households
+            that belong to the “same” group and the proportion of households belonging to the “other” group. Depending
+            on a household’s tolerance level, the household can then either decide to move to a new neighborhood or to
+            stay.'''),
+
 
 
         ], style={'font-size': '1.1rem',
@@ -344,7 +361,80 @@ def serve_layout():
                }),
 
         html.Br(),
+
+        # interactive tool: example neighborhood similarity calculation
+        html.Div([
+
+            html.Hr(),
+
+            html.Br(),
+
+            html.H4('Figure 2: Sample Similarity Calculation'),
+
+            html.Br(),
+
+            dbc.Row([
+
+                # left column
+                dbc.Col([
+
+                    html.Div(id='sample-calc-grid')
+
+                ], width=6),
+
+                # right column
+                dbc.Col([
+
+                    html.Div('''We calculate the comfort of the center household, marked by the X,
+                        by counting the number of similar and dissimilar households in the surrounding
+                        neighborhood. In this example, assume that a household would prefer to live
+                        in a neighborhood where at least 51% of her neighbors are like her.'''),
+
+                    html.Br(),
+
+                    dbc.Row([
+
+                        dbc.Col([
+                            html.Div('Select neighborhood:', style={'color': 'grey'}),
+                            dcc.Dropdown(id='radius-input',
+                                         options=[{'label': "Radius {}".format(i), 'value': i} for i in range(1, 5)],
+                                         value=2,
+                                         clearable=False,
+                                         ),
+                        ], width=5),
+
+                        dbc.Col('', width=1),
+
+                        dbc.Col([
+                            html.Div([
+                                dt.DataTable(id='sample-table',
+                                             columns=sample_columns,
+                                             style_cell_conditional=sample_style_cell_conditional,
+                                             style_data_conditional=sample_style_data_conditional,
+                                             style_as_list_view=True
+                                             )
+                            ])
+                        ], width=6),
+
+                    ]),
+
+                    html.Br(),
+
+                    html.Div(id='sample-conclusion', style={'font-weight': 'bold'})
+
+                ], width=6),
+
+            ]),
+
+        ], style={'margin': 'auto',
+                  'text-align': 'left',
+                  'max-width': '900px'}),
+
         html.Br(),
+        html.Br(),
+
+
+
 
         # Introduction
         html.Div([
@@ -389,73 +479,9 @@ def serve_layout():
 
 
 
-        # interactive tool: example neighborhood similarity calculation
-        html.Div([
-
-            html.Hr(),
-
-            html.Br(),
-
-            html.H4('Sample Similarity Calculation'),
-
-            html.Br(),
-
-            dbc.Row([
-
-                # left column
-                dbc.Col([
-
-                    html.Div(id='sample-calc-grid')
-
-                ], width=6),
-
-                # right column
-                dbc.Col([
-
-                    html.Div('''We calculate the comfort of the center household, marked by the X,
-                    by counting the number of similar and dissimilar households in the surrounding
-                    neighborhood. In this example, assume that a household would prefer to live
-                    in a neighborhood where at least 50% of her neighbors are like her.'''),
-
-                    html.Br(),
 
 
-                    dbc.Row([
 
-                        dbc.Col([
-                            html.Div('Select neighborhood:', style={'color': 'grey'}),
-                            dcc.Dropdown(id='radius-input',
-                                         options=[{'label': "Radius {}".format(i), 'value': i} for i in range(1,5)],
-                                         value=2,
-                                         clearable = False,
-                                         ),
-                        ], width=5),
-
-                        dbc.Col('', width=1),
-
-                        dbc.Col([
-                            html.Div([
-                                dt.DataTable(id='sample-table',
-                                             columns=sample_columns,
-                                             style_cell_conditional=sample_style_cell_conditional,
-                                             style_data_conditional=sample_style_data_conditional,
-                                             style_as_list_view=True
-                                             )
-                            ])
-                        ], width=6),
-
-                    ]),
-
-                ], width=6),
-
-            ]),
-
-        ], style={'margin': 'auto',
-               'text-align': 'left',
-               'max-width': '1100px'}),
-
-        html.Br(),
-        html.Br(),
 
         # interactive tool: example neighborhood similarity calculation
         html.Div([
@@ -505,7 +531,8 @@ layout = serve_layout
 
 
 @app.callback([Output(component_id='sample-calc-grid', component_property='children'),
-               Output(component_id='sample-table', component_property='data'),],
+               Output(component_id='sample-table', component_property='data'),
+               Output(component_id='sample-conclusion', component_property='children')],
               [Input(component_id='radius-input', component_property='value')])
 def sample_calc(radius):
 
@@ -542,9 +569,16 @@ def sample_calc(radius):
                   'Count': [x_count, o_count, blank_count],
                   'Pct': [x_count / neighbor_count, o_count/neighbor_count, np.NaN]})
 
-    print(df)
 
-    print('radius', radius)
+    if x_count / neighbor_count >=0.51:
+        text1 = 'stay put'
+        text2 = 'many'
+    else:
+        text1 = 'move away'
+        text2 = 'too few'
+    conclusion_text='''Given an in-group preference of 51%, the center household will {} since
+     {} ({:.2f}%) of her neighbor are like her'''.format(text1, text2, x_count/neighbor_count * 100)
+
     return html.Div(build_checkerboard(n=n, r=radius, h=h, population=xs_os), style=format_grid(n=n, h=h)),\
-           df.to_dict('records')
+           df.to_dict('records'), conclusion_text
 
