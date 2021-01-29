@@ -582,3 +582,6 @@ def sample_calc(radius):
     return html.Div(build_checkerboard(n=n, r=radius, h=h, population=xs_os), style=format_grid(n=n, h=h)),\
            df.to_dict('records'), conclusion_text
 
+
+
+
