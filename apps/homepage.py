@@ -17,6 +17,8 @@ from apps import functions as fn
 import visdcc
 
 
+eln_link='https://jbortfeld.medium.com/financial-products-for-the-wealthy-should-the-rest-of-us-be-jealous-ca5b7a2ff178'
+
 def serve_layout():
 
     return [
@@ -51,7 +53,60 @@ def serve_layout():
 
             ]),
 
+
             dbc.Row([
+
+                dbc.Col([
+
+                    dbc.Card(
+                        [
+                            dbc.CardImg(src="/assets/schelling_cover.png", top=True, style={'height': '225px', 'width': '95%', 'margin': 'auto'}),
+                            dbc.CardBody(
+                                [
+                                    html.H4('''Residential Segregation: Why We Don't Live Together''', className="card-title",
+                                            style={'height': '75px'}),
+                                    html.P(
+                                        "A classic implementation of agent-based modeling (ABM)",
+                                        className="card-text",
+                                        style={'backgroundColor': 'white', 'color': 'grey', 'height': '55px'},
+                                    ),
+                                    dbc.CardLink("App", href='/schelling-segregation'),
+                                    # dbc.CardLink("Blog", href='#'),
+                                ], style={'borderTop': '1px solid grey'}
+                            ),
+                        ],
+                        style={'border': '5px #26BE81 solid', 'borderRadius': '25px', 'paddingTop': '3%',
+                               'height': '450px'}, outline=False,
+                    )
+
+                ], width=4),
+
+               dbc.Col([
+
+                   dbc.Card(
+                       [
+                           dbc.CardImg(src="/assets/eln_cover.png", top=True, style={'height': '225px'}),
+                           dbc.CardBody(
+                               [
+                                   html.H4('''Financila Products for the Wealthy: Should the
+                                           Rest of Us be Jealous?''' , className="card-title",
+                                           style={'height': '75px'}),
+                                   html.P(
+                                       "Risks and returns for an Equity-linked Note",
+                                       className="card-text",
+                                       style={'backgroundColor': 'white', 'color': 'grey', 'height': '55px'},
+                                   ),
+                                   dbc.CardLink("Blog", href=eln_link),
+                                   # dbc.CardLink("Blog", href='#'),
+                               ], style={'borderTop': '1px solid grey'}
+                           ),
+                       ],
+                       style={'border': '5px #26BE81 solid', 'borderRadius': '25px', 'paddingTop': '3%',
+                              'height': '450px'}, outline=False,
+                   )
+
+
+               ], width=4),
 
                 dbc.Col([
 
@@ -60,20 +115,32 @@ def serve_layout():
                             dbc.CardImg(src="/assets/ar_cover.png", top=True, style={'height': '225px'}),
                             dbc.CardBody(
                                 [
-                                    html.H4("Research Replication: Systemic Risk", className="card-title", style={'height': '55px'}),
+                                    html.H4("Research Replication: Systemic Risk", className="card-title",
+                                            style={'height': '55px'}),
                                     html.P(
                                         "Measure systemic risk and market fragility in the US stock market using PCA.",
-                                        className="card-text", style={'backgroundColor': 'white', 'color': 'grey', 'height': '55px'},
+                                        className="card-text",
+                                        style={'backgroundColor': 'white', 'color': 'grey', 'height': '55px'},
                                     ),
                                     dbc.CardLink("App", href='/systemic-risk'),
-                                    #dbc.CardLink("Blog", href='#'),
+                                    # dbc.CardLink("Blog", href='#'),
                                 ], style={'borderTop': '1px solid grey'}
                             ),
                         ],
-                        style={'border': '5px #26BE81 solid', 'borderRadius': '25px', 'paddingTop': '3%', 'height': '450px'}, outline=False,
+                        style={'border': '5px #26BE81 solid', 'borderRadius': '25px', 'paddingTop': '3%',
+                               'height': '450px'}, outline=False,
                     )
 
                 ], width=4),
+
+            ]),
+
+            html.Br(),
+
+
+            dbc.Row([
+
+
 
                 dbc.Col([
 

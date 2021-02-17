@@ -148,6 +148,8 @@ sample_columns.append({'name': 'Pct',
 
 def serve_layout():
 
+    custom_tab_selected = {'borderTop': '6px solid #26BE81'}
+
 
     return [
 
@@ -205,7 +207,6 @@ def serve_layout():
                'text-align': 'left',
                'max-width': '750px'}),
 
-        html.Br(),
         html.Br(),
 
         # intro
@@ -313,14 +314,14 @@ def serve_layout():
             html.P('''Though this app will use residential segregation as a way to discuss ABM, it is not a
             comprehensive overview of the complex social, political and economic dynamics. While computer scientists
             are able to contribute to the conversation, as will be demonstrated in this app, a serious discussion of
-            this topic deserves a multidisciplinary approach with perspectives from historians, statisticians and
-            economists.''', style={'background-color': 'lightyellow', 'border': '2px solid black', 'border-radius': '20px', 'padding': '6px'}),
+            this topic deserves a multidisciplinary approach with perspectives from historians, statisticians,
+            economists and others.''', style={'background-color': 'lightyellow', 'border': '2px solid black', 'border-radius': '20px', 'padding': '6px'}),
 
             html.Br(),
 
             html.H3('''Agent-based Modeling Methodology'''),
 
-            html.P('''The objective of agent-based modeling is to replicate reality using a programmed computer
+            html.P('''The objective of agent-based modeling is to replicate reality using a computer
             simulation that is as simple as possible. In our case, we want to simulate residential evolutions that
             reproduce observed segregation patterns, or the clustering of different groups, based on as few factors
             in our computer program as possible. If we are able to replicate observed reality, we will have “explained”
@@ -426,22 +427,61 @@ def serve_layout():
 
             ]),
 
+            html.Br(),
+
+            html.Hr(),
+
+            html.Br(),
+
         ], style={'margin': 'auto',
                   'text-align': 'left',
                   'max-width': '900px'}),
 
-        html.Br(),
-        html.Br(),
 
 
+        html.Div([
+
+            html.P('''Using this setting, we can plan our simulation. Below we present three the methodology
+            at three levels of abstraction, ranging from a qualitative description to technical code.'''),
+
+            html.Br(),
+            html.Br(),
+
+            html.Div([
+
+                dcc.Tabs(id='methodology-tabs', value='tab-1', children=[dcc.Tab(label='Intuition',
+                                                                                 value='tab-1',
+                                                                                 selected_style=custom_tab_selected),
+                                                                         dcc.Tab(label='Pseudocode',
+                                                                                 value='tab-2',
+                                                                                 selected_style=custom_tab_selected),
+                                                                         dcc.Tab(label='Code',
+                                                                                 value='tab-3',
+                                                                                 selected_style=custom_tab_selected)
+                                                                         ]),
+
+                html.Br(),
+                html.Br(),
+
+                html.Div(id='methodology-content'),
+
+            ], style={'border': '4px solid #26BE81', 'padding': '5%'}),
+
+            html.Br(),
+            html.Br(),
+
+        ], style={'font-size': '1.1rem',
+                  'margin': 'auto',
+                  'max-width': '750px',
+                  'text-align': 'left',
+                  }),
 
 
-        # Introduction
         html.Div([
 
             html.Hr(),
 
-            html.H4('Figure 1: Migration Simulation'),
+            html.H4('Figure 3: Migration Simulation'),
 
             dbc.Row([
 
@@ -479,46 +519,6 @@ def serve_layout():
 
 
 
-
-
-
-
-        # interactive tool: example neighborhood similarity calculation
-        html.Div([
-
-            html.Hr(),
-
-            html.Br(),
-
-            html.H3('Segregation Simulation'),
-
-            html.Br(),
-
-            dbc.Row([
-
-                dbc.Col([
-                    html.Div('simulator here'),
-                    html.Div(id='simulator')
-                ], width=9),
-
-                dbc.Col([
-
-                    html.Div('''Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor
-                    incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation
-                    ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit
-                    in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat
-                    non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.'''),
-
-                    html.Br(),
-
-
-                ], width=3),
-
-            ]),
-
-        ], style={'margin': 'auto',
-                  'text-align': 'left',
-                  'max-width': '1000px'}),
 
 
 
@@ -585,3 +585,150 @@ def sample_calc(radius):
 
 
 
+
+layout = serve_layout
+
+
+
+@app.callback(dash.dependencies.Output(component_id='methodology-content', component_property='children'),
+              [dash.dependencies.Input(component_id='methodology-tabs', component_property='value')])
+def update_theory_purpose(tab):
+
+    if tab == 'tab-1':
+
+        content = html.Div([
+
+            html.P('''We build a computer simulation by constructing a city and randomly placing Black and Hispanic
+            families in the houses. We imagine that in month 1, each household evaluates how happy they are in their
+            neighborhood based on the composition of their neighbors. Families that are surrounded by enough “similar”
+            people are content and decide to stay in their home. Families that are discontent, because the number of
+            similar families is below their comfort level, decide to move away to a different home. '''),
+
+            html.P('''It is now month 2 and each family repeats their evaluation process and decides to stay in
+            their home or move. We repeat this cycle until the city begins to stabilize, perhaps many months later,
+            and very few families are moving around. The stabilization of the city signifys that almost all of the
+            households are content in their respective neighborhoods. It is important to note that while a family be
+            satisfied with their neighborhood in one period and therefore decide to stay, the neighborhood itself may
+            change over time as older households move away and newer households move in. With these changes, a
+            household that was formerly content may end up moving away in the future.''')
+
+        ])
+
+
+
+    elif tab == 'tab-2':
+
+        content = html.Div([
+
+            dcc.Markdown('''
+
+            ```py
+
+            Randomly place households across the city
+            Calculate the % of similar households in the neighborhood for each household
+            Determine which households want to move
+
+            While (# of households that want to move) > 0:
+
+                For every household that wants to move:
+                    Randomly move the household to a new home
+
+                For every household:
+                    Calculate the % of similar households in the neighborhood
+                    Determine if the household wants to move
+            ```
+            ''')
+
+
+        ])
+
+    else:
+
+        content = html.Div([
+
+            dcc.Markdown('''
+
+            ```py
+
+            # the main function for running the abm-based segregation simulation is below.
+            # for the full code, including all functions, see the github
+            # https://github.com/jbortfeld/QuantView
+
+            def simulate(grid: np.array, radius: int, cutpoint: float, num_iterations:int=50, verbose:int=0):
+
+                """
+                run the segregation simulation for a given landscape (grid)
+                """
+
+                # save the environment at eash iteration
+                simulations = []
+                simulations.append(grid.copy())
+
+                all_spaces = get_all_spaces(grid=grid)
+
+                system = calc_avg_similarity(grid=grid)
+
+                if not verbose is False:
+                    print('starting systemic similarity: {:.3f}'.format(np.array(system).mean()))
+
+                start = time.time()
+
+                for _ in range(num_iterations):
+
+                    # 1. get available empty spaces
+                    free_spaces = find_values(grid=grid, val='E')
+
+                    # randomly shuffle the available spaces
+                    random.shuffle(free_spaces)
+
+                    # 2. get agents that want to move
+                    wants_to_move = []
+                    for agent in all_spaces:
+                        if get_value(x=agent, grid=grid) != 'E':
+
+                            _neighbors = neighbors(x=agent, grid=grid, radius=radius)
+                            _similarity = similarity(x_value=get_value(x=agent, grid=grid), grid=grid, neighbors=_neighbors)
+
+                            if _similarity < cutpoint:
+                                wants_to_move.append(agent)
+
+                    # randomly shuffle the agents that want to move
+                    random.shuffle(wants_to_move)
+                    print('{} agents want to move'.format(len(wants_to_move)))
+
+                    # try to move each agent that is unhappy
+                    for agent in wants_to_move:
+
+                        # if there are free spaces still available (not including spaces that became free because someone
+                        # moved in this period)
+                        if len(free_spaces) > 0:
+
+                            _free_space = free_spaces.pop()
+                            grid = swap(grid=grid, source=agent, dest=_free_space)
+
+
+                    # print avg similarity across the entire system
+                    system = calc_avg_similarity(grid=grid)
+
+
+                    if verbose == 0:
+                        pass
+                    elif verbose == 1:
+                        print('--iteration {}: systemic similarity: {:.3f}'.format(_, np.array(system).mean()), end="")
+                    elif verbose == 2:
+                        print('--iteration {}: systemic similarity: {:.3f}'.format(_, np.array(system).mean()) )
+
+                    # save the environment at the end of this iteration
+                    simulations.append(grid.copy())
+
+                if verbose:
+                    print()
+                    print('done in {}s'.format(time.time() - start))
+                return np.array(system).mean(), simulations
+
+
+            ```
+            ''')
+        ])
+
+    return content
