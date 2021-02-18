@@ -315,11 +315,15 @@ def serve_layout():
             comprehensive overview of the complex social, political and economic dynamics. While computer scientists
             are able to contribute to the conversation, as will be demonstrated in this app, a serious discussion of
             this topic deserves a multidisciplinary approach with perspectives from historians, statisticians,
-            economists and others.''', style={'background-color': 'lightyellow', 'border': '2px solid black', 'border-radius': '20px', 'padding': '6px'}),
+            economists and others.''',
+                   style={'background-color': 'lightyellow',
+                          'border': '2px solid black',
+                          'border-radius': '20px',
+                          'padding': '6px'}),
 
             html.Br(),
 
-            html.H3('''Agent-based Modeling Methodology'''),
+            html.H3('''Agent-based Modeling Philosophy'''),
 
             html.P('''The objective of agent-based modeling is to replicate reality using a computer
             simulation that is as simple as possible. In our case, we want to simulate residential evolutions that
@@ -338,7 +342,7 @@ def serve_layout():
 
             html.Br(),
 
-            html.H3('''Simulation'''),
+            html.H3('''Simulation Methodology'''),
 
             html.P('''To program our segregation simulation we model a simplified reality. We represent a city as a
             2D grid, like a checkerboard, and each square in the grid represents a residence that can be occupied by
@@ -346,7 +350,7 @@ def serve_layout():
             that this simplification, amongst many assumptions we’ll make, is not material to the analysis.'''),
 
             html.P('''Next we assume in our model that there are two types of households (say White and Asian or
-            Lannister and Targaryen) and that each household is primarily concerned about belonging to a neighborhood
+            Houses Gryffindor and Voldemort) and that each household is primarily concerned about belonging to a neighborhood
             filled with similar neighbors. To measure the similarity of a neighborhood for a given household, we define
             a neighborhood as the adjacent houses within some radius and then calculate the proportion of households
             that belong to the “same” group and the proportion of households belonging to the “other” group. Depending
@@ -441,7 +445,7 @@ def serve_layout():
 
         html.Div([
 
-            html.P('''Using this setting, we can plan our simulation. Below we present three the methodology
+            html.P('''Using this setting, we can plan our simulation. Below we present the methodology
             at three levels of abstraction, ranging from a qualitative description to technical code.'''),
 
             html.Br(),
@@ -466,6 +470,22 @@ def serve_layout():
                 html.Div(id='methodology-content'),
 
             ], style={'border': '4px solid #26BE81', 'padding': '5%'}),
+
+            html.Br(),
+            html.Br(),
+
+            html.H3('''Results and Analysis'''),
+
+            html.Br(),
+            html.Br(),
+
+
+            html.Div([
+
+                html.P('''Lorem ipsum'''),
+
+
+            ]),
 
             html.Br(),
             html.Br(),
@@ -499,10 +519,11 @@ def serve_layout():
                     html.Br(),
 
                     html.P('''Each square represents a household that considers whether to remain or move to a different
-                    spot in the grid. Households make the decision based on a simple logic: Stay if at least 40% of
+                    spot in the grid (black squares are empty homes and households can move into them).
+                    Households make the decision based on a simple logic: Stay if at least 40% of
                     its neighbors are a similar color, or else move otherwise. Even though everyone is content
                     to be a minority and live in an integrated neighborhood, over time the grid becomes
-                    segregated.''')
+                    segregated with a clear separation between the two groups in comparison to the starting state.''')
                 ], width=5),
 
             ]),
