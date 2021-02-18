@@ -88,7 +88,7 @@ def serve_layout():
                            dbc.CardImg(src="/assets/eln_cover.png", top=True, style={'height': '225px'}),
                            dbc.CardBody(
                                [
-                                   html.H4('''Financila Products for the Wealthy: Should the
+                                   html.H4('''Financial Products for the Wealthy: Should the
                                            Rest of Us be Jealous?''' , className="card-title",
                                            style={'height': '75px'}),
                                    html.P(
