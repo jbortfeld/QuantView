@@ -482,7 +482,36 @@ def serve_layout():
 
             html.Div([
 
-                html.P('''Lorem ipsum'''),
+                html.P('''Our analysis proceeds using the methodology described above, which is based around the
+                simple premise that households might have a preference to live in a neighborhood that reflects their
+                ethnic identity. When that preference is very strong, a White household might only be content if 90%
+                of their neighbors are also White. On the other hand, if the preference is relatively weak then a
+                Hispanic household might be perfectly content in a neighborhood that is only 20% Hispanic. '''),
+
+                html.P('''Before we run the experiment and bias our opinions, it is an opportune time to ask what are
+                our expectations? Without overthinking the question, here are two uneducated though reasonable guesses
+                on what we might observe from the simulation:'''),
+
+                html.Ul([
+
+                    dcc.Markdown('''*Inclusive racial attitudes should lead to integrated neighborhoods.* If
+                    households have a low in-group preference, then we expect to see more mixed neighborhoods over time.
+                    Conversely, if households have a high in-group preference, then we would expect to see more
+                    segregated neighborhoods.'''),
+
+                ]),
+
+                html.Ul([
+
+                    dcc.Markdown('''*The level of diversity in a neighborhood is likely to be equal to the average
+                    preference level.* If the average household preference is 55%, then we might expect that that the
+                    average neighborhood will be composed of a 55-45 split between the two groups (or replace 55% with
+                    any percentage and matching split)''')
+
+                ]),
+
+                html.P('''Below we run our simulation using a small 16x32 grid with around 512 households.
+                Each household has a relatively inclusive in-group preference of 40%.'''),
 
 
             ]),
@@ -537,11 +566,15 @@ def serve_layout():
         html.Br(),
         html.Br(),
 
+        html.Div([
 
 
 
-
-
+        ], style={'font-size': '1.1rem',
+                  'margin': 'auto',
+                  'max-width': '750px',
+                  'text-align': 'left',
+                  }),
 
     ]
 
