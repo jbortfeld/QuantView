@@ -146,6 +146,30 @@ sample_columns.append({'name': 'Pct',
                        'type': 'numeric',
                        'format': FormatTemplate.percentage(1)})
 
+
+
+# figure 4: chart of preference level vs outcome
+df4 = pd.read_csv('data/segregation_figure4.csv')
+df4 = df4[df4['cut'] <= 0.5]
+
+data4 = [{'x': df4['cut'],
+          'y': df4['avg'],
+          'type': 'line+markers',
+          'name': 'series',
+          'line': {'color': '#26BE81', 'width': 4},}]
+
+figure4_layout =  {'height': 400,
+                    'legend': {
+                        'orientation': 'h'
+                    },
+                    'margin': {'t': 10, 'l': 40, 'b': 40},
+                   'xaxis': {'title': 'In-group Preference'},
+                   'yaxis': {'title': 'Avg End Similarity'}
+                    }
+
+figure4 = {'data': data4,
+           'layout': figure4_layout}
+
 def serve_layout():
 
     custom_tab_selected = {'borderTop': '6px solid #26BE81'}
@@ -477,8 +501,6 @@ def serve_layout():
             html.H3('''Results and Analysis'''),
 
             html.Br(),
-            html.Br(),
-
 
             html.Div([
 
@@ -488,9 +510,9 @@ def serve_layout():
                 of their neighbors are also White. On the other hand, if the preference is relatively weak then a
                 Hispanic household might be perfectly content in a neighborhood that is only 20% Hispanic. '''),
 
-                html.P('''Before we run the experiment and bias our opinions, it is an opportune time to ask what are
-                our expectations? Without overthinking the question, here are two uneducated though reasonable guesses
-                on what we might observe from the simulation:'''),
+                html.P('''Before we run the experiment it is an opportune time, and also good research practice,
+                to ask what are our expectations (do we have any hypotheses)? Without overthinking the question,
+                here are two uneducated though reasonable guesses on what we might observe from the simulation:'''),
 
                 html.Ul([
 
@@ -568,6 +590,33 @@ def serve_layout():
 
         html.Div([
 
+            html.P('''The simulation shows that starting from a completely integrated initial state, the system
+            evolves over time with households moving to new locations until the entire system stabilizes in a
+            segregated state. Interestingly, mortgage and land-use discrimination, while present in reality, were not
+            necessary to produce a segregated outcome. Furthermore, an arguably low level of in-group preferences was
+            sufficient to produce the segregated outcome.'''),
+
+            html.P('''We rerun the simulation while varying the in-group preference levels in order to investigate
+            whether more inclusive attitudes are associated with more integrated outcomes. At each preference level
+             that we test, we run multiple simulations and record the average outcome by calculating the average
+             similarity of the neighborhood from the point-of-view of each household.'''),
+
+            html.P('''In the below chart (Figure 4) we see that below a 25% preference level, the landscape is
+            mostly integrated with an average similarity that doesn’t change from the initial random (integrated)
+            state. Above the 25% preference level however, the system very quickly changes and the final states grow
+            to higher levels of segregation between the groups, rising to 90% similarity given a 50% in-group
+            preference level. Note that under our simulation the average similarity will never grow to 100% given
+            that households on the border between two segregated neighbors will still count some out-of-group members
+            in their neighborhood.'''),
+
+            html.Br(),
+
+            html.H4('''Figure 4: Outcomes for Various In-group Preference Levels'''),
+
+            html.Br(),
+
+            dcc.Graph(figure=figure4),
+
 
 
         ], style={'font-size': '1.1rem',
@@ -575,6 +624,11 @@ def serve_layout():
                   'max-width': '750px',
                   'text-align': 'left',
                   }),
+
+        html.Br(),
+        html.Br(),
+        html.Br(),
+        html.Br(),
 
     ]
 
