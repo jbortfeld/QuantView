@@ -147,7 +147,7 @@ sample_columns.append({'name': 'Pct',
                        'format': FormatTemplate.percentage(1)})
 
 
-
+############################################################
 # figure 4: chart of preference level vs outcome
 df4 = pd.read_csv('data/segregation_figure4.csv')
 df4 = df4[df4['cut'] <= 0.5]
@@ -158,17 +158,138 @@ data4 = [{'x': df4['cut'],
           'name': 'series',
           'line': {'color': '#26BE81', 'width': 4},}]
 
-figure4_layout =  {'height': 400,
+layout4 =  {'height': 300,
                     'legend': {
                         'orientation': 'h'
                     },
-                    'margin': {'t': 10, 'l': 40, 'b': 40},
+                    'margin': {'t': 10, 'l': 50, 'b': 40},
                    'xaxis': {'title': 'In-group Preference'},
                    'yaxis': {'title': 'Avg End Similarity'}
                     }
 
 figure4 = {'data': data4,
-           'layout': figure4_layout}
+           'layout': layout4}
+
+############################################################
+# figure 5: avg similarity over time
+df5 = pd.read_csv('data/segregation_figure5.csv')
+df5.set_index('t', inplace=True)
+show_cols = ['0.2', '0.25', '0.3', '0.35', '0.4', '0.45', '0.5']
+show_cols2 = ['0.2', '0.25', '0.3', '0.35', '0.4', '0.45']
+end_values = df5.iloc[-1]
+
+
+annotations5 = [{'xref': 'paper',
+                 'x': 1.1,
+                 'y': end_values[col],
+                 'text': col,
+                 'showarrow': False,
+                 'font': {'color': 'orange', 'family': 'avenir', 'size': 12} } for col in show_cols2]
+
+annotations5.append({'xref': 'paper',
+                 'x': 1.15,
+                 'y': end_values['0.5'],
+                 'text': 'Pref = 0.5',
+                 'showarrow': False,
+                 'font': {'color': 'orange', 'family': 'avenir', 'size': 12} } )
+
+
+# source: https://design.pega.com/data-viz-single-hue-color-palettes-continuous-data
+colors5 = {'0.05': '#FFF8EE',
+           '0.1': '#FFF1DC',
+           '0.15': 'FFE9CB',
+           '0.2': '#FFE2B9',
+           '0.25': '#FFDAA7',
+           '0.3': '#FFD395',
+           '0.35': '#FFCB82',
+           '0.4': '#FFC470',
+           '0.45': '#FFB646',
+           '0.5': '#FEA637'}
+
+df5 = df5[show_cols]
+
+# source: https://design.pega.com/data-viz-single-hue-color-palettes-continuous-data
+data5 = [{'x': df5.index,
+          'y': df5[col],
+          'type': 'line',
+          'name': col,
+          'opacity': col,
+          'line': {'color': colors5[col], 'width': 4}} for col in show_cols]
+
+layout5 = {'height': 400,
+           'legend': {'orientation': 'h'},
+           'showlegend': False,
+           'plot_bgcolor': 'white',
+           'margin': {'t': 10, 'l': 50, 'b': 40},
+           'xaxis': {'title': 'Period'},
+           'yaxis': {'title': 'Avg Similarity'},
+           'annotations': annotations5
+           }
+
+figure5 = {'data': data5,
+           'layout': layout5}
+############################################################
+# figure 6: discontents over time
+df6 = pd.read_csv('data/segregation_figure6.csv')
+df6.set_index('t', inplace=True)
+show_cols = ['0.2', '0.25', '0.3', '0.35', '0.4', '0.45', '0.5']
+show_cols2 = ['0.2', '0.25', '0.3', '0.35', '0.4', '0.45']
+end_values = df6.iloc[-1]
+
+
+annotations6 = [{'xref': 'paper',
+                 'x': 1.1,
+                 'y': end_values[col],
+                 'text': col,
+                 'showarrow': False,
+                 'font': {'color': 'blue', 'family': 'avenir', 'size': 12} } for col in ['0.3']]
+
+annotations6.append({'xref': 'paper',
+                 'x': 1.15,
+                 'y': end_values['0.5'],
+                 'text': 'Pref = 0.5',
+                 'showarrow': False,
+                 'font': {'color': 'blue', 'family': 'avenir', 'size': 12} } )
+
+
+# source: https://design.pega.com/data-viz-single-hue-color-palettes-continuous-data
+colors6 = {'0.05': '#E7EFF7',
+           '0.1': '#D1E0EE',
+           '0.15': 'B9CFE5',
+           '0.2': '#A2BFDD',
+           '0.25': '#8BAFD3',
+           '0.3': '#749FCB',
+           '0.35': '#5D90C2',
+           '0.4': '#427FBA',
+           '0.45': '#005FA7',
+           '0.5': '#00428B'}
+
+df6 = df6[show_cols]
+
+# source: https://design.pega.com/data-viz-single-hue-color-palettes-continuous-data
+data6 = [{'x': df6.index,
+          'y': df6[col],
+          'type': 'line',
+          'name': col,
+          'opacity': col,
+          'line': {'color': colors6[col], 'width': 4}} for col in show_cols]
+
+layout6 = {'height': 400,
+           'legend': {'orientation': 'h'},
+           'showlegend': False,
+           'plot_bgcolor': 'white',
+           'margin': {'t': 10, 'l': 50, 'b': 40},
+           'xaxis': {'title': 'Period'},
+           'yaxis': {'title': 'Discontents (% of Households)'},
+           'annotations': annotations6
+           }
+
+figure6 = {'data': data6,
+           'layout': layout6}
+
+
+
+
 
 def serve_layout():
 
@@ -601,13 +722,13 @@ def serve_layout():
              that we test, we run multiple simulations and record the average outcome by calculating the average
              similarity of the neighborhood from the point-of-view of each household.'''),
 
-            html.P('''In the below chart (Figure 4) we see that below a 25% preference level, the landscape is
-            mostly integrated with an average similarity that doesn’t change from the initial random (integrated)
-            state. Above the 25% preference level however, the system very quickly changes and the final states grow
-            to higher levels of segregation between the groups, rising to 90% similarity given a 50% in-group
-            preference level. Note that under our simulation the average similarity will never grow to 100% given
-            that households on the border between two segregated neighbors will still count some out-of-group members
-            in their neighborhood.'''),
+            html.P('''In the below chart (Figure 4) we see that below a 25% preference level, the neighborhoods are
+            mostly heterogenous with an average similarity that doesn’t change from the initial (integrated) state.
+            Above the 25% preference level however, the system crosses a tipping point and the end states start to
+            show more segregated outcomes, rising to average neighborhood similarity of 90% given a 50% in-group
+            preference level. Note that under our simulation the average similarity will never grow to 100% given that
+            households on the border between two segregated neighbors will still count some out-of-group members in
+            their neighborhood. '''),
 
             html.Br(),
 
@@ -617,11 +738,56 @@ def serve_layout():
 
             dcc.Graph(figure=figure4),
 
+            html.Br(),
+
+            html.P('''These results are consistent with our original prediction that rising in-group preference
+            levels are associated with higher rates of homogenous neighborhoods. Our predictions however underestimated
+            the level of in-group preference that was needed to generate segregated neighborhoods.'''),
+
+            html.P('''We present two more charts to show how the systems evolved over the simulation iterations.
+            Figure 5 shows that the average similarity at each time step and illustrates the rate of segregation.
+            Relatedly Figure 6 shows '''),
+
+            html.Br(),
 
 
         ], style={'font-size': '1.1rem',
                   'margin': 'auto',
                   'max-width': '750px',
+                  'text-align': 'left',
+                  }),
+
+        html.Div([
+
+            dbc.Row([
+
+                dbc.Col([
+
+                    html.H4('''Figure 5: Mean Similarity Over Time'''),
+
+                    dcc.Graph(figure=figure5)
+
+                ], width=6),
+
+
+
+
+                dbc.Col([
+
+                    html.H4('''Figure 6: Discontents Over Time '''),
+
+                    dcc.Graph(figure=figure6)
+
+                ], width=6)
+
+
+
+            ])
+
+
+        ], style={'font-size': '1.1rem',
+                  'margin': 'auto',
+                  'max-width': '1100px',
                   'text-align': 'left',
                   }),
 
