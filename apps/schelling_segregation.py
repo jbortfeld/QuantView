@@ -888,13 +888,13 @@ def serve_layout():
             epidemiology to model the spread of the coronavirus across communities and forecast transmission,
             hospitalization and fatality scenarios.'''),
 
-            html.P('''Within finance and economics however, ABM has arguably not
-            produced a large body of insights, though it does maintain its own group of advocates
-            and there are notable achievements. For example, ABM can be used to explain the existence of so-called
-            "fat-tails" in asset returns as the systemic outcome of interactions between fundamental and technical
-            traders. In economics, ABM may also explain economic contractions as the endogenous outcome of
-            economic actors rather than modeling recessions as external shocks. We think that these are interesting
-            applications of ABM with novel results. We hope to cover these in depth in the future.''')
+            html.P('''Within finance and economics however, ABM has arguably not produced a large body of insights,
+            though it does maintain its own group of advocates and there are notable achievements. For example, ABM
+            can be used to explain the existence of so-called "fat-tails" in asset returns and volatility clustering
+            as the systemic outcome of interactions between fundamental and technical traders. In economics, ABM may
+            also explain economic contractions as the endogenous outcome of economic actors rather than modeling
+            recessions as external shocks. We think that these are interesting applications of ABM with novel results.
+            We hope to cover these in depth in the future.''')
 
 
 
