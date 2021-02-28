@@ -174,7 +174,7 @@ figure4 = {'data': data4,
 # figure 5: avg similarity over time
 df5 = pd.read_csv('data/segregation_figure5.csv')
 df5.set_index('t', inplace=True)
-show_cols = ['0.2', '0.25', '0.3', '0.35', '0.4', '0.45', '0.5']
+show_cols = ['0.2', '0.25', '0.3', '0.35', '0.4', '0.45', '0.5', '0.6']
 show_cols2 = ['0.2', '0.25', '0.3', '0.35', '0.4', '0.45']
 end_values = df5.iloc[-1]
 
@@ -193,6 +193,13 @@ annotations5.append({'xref': 'paper',
                  'showarrow': False,
                  'font': {'color': 'orange', 'family': 'avenir', 'size': 12} } )
 
+annotations5.append({'xref': 'paper',
+                 'x': 1.1,
+                 'y': end_values['0.6'],
+                 'text': '0.6',
+                 'showarrow': False,
+                 'font': {'color': 'red', 'family': 'avenir', 'size': 12} } )
+
 
 # source: https://design.pega.com/data-viz-single-hue-color-palettes-continuous-data
 colors5 = {'0.05': '#FFF8EE',
@@ -204,7 +211,8 @@ colors5 = {'0.05': '#FFF8EE',
            '0.35': '#FFCB82',
            '0.4': '#FFC470',
            '0.45': '#FFB646',
-           '0.5': '#FEA637'}
+           '0.5': '#FEA637',
+           '0.6': 'red'}
 
 df5 = df5[show_cols]
 
@@ -637,21 +645,24 @@ def serve_layout():
 
                 html.Ul([
 
+
+                    html.Li(
                     dcc.Markdown('''*Inclusive racial attitudes should lead to integrated neighborhoods.* If
                     households have a low in-group preference, then we expect to see more mixed neighborhoods over time.
                     Conversely, if households have a high in-group preference, then we would expect to see more
-                    segregated neighborhoods.'''),
+                    segregated neighborhoods.''')
+                    ),
 
-                ]),
-
-                html.Ul([
-
+                    html.Li(
                     dcc.Markdown('''*The level of diversity in a neighborhood is likely to be equal to the average
                     preference level.* If the average household preference is 55%, then we might expect that that the
                     average neighborhood will be composed of a 55-45 split between the two groups (or replace 55% with
                     any percentage and matching split)''')
+                    )
 
                 ]),
+
+
 
                 html.P('''Below we run our simulation using a small 16x32 grid with around 512 households.
                 Each household has a relatively inclusive in-group preference of 40%.'''),
@@ -731,6 +742,7 @@ def serve_layout():
             their neighborhood. '''),
 
             html.Br(),
+            html.Br(),
 
             html.H4('''Figure 4: Outcomes for Various In-group Preference Levels'''),
 
@@ -739,6 +751,7 @@ def serve_layout():
             dcc.Graph(figure=figure4),
 
             html.Br(),
+            html.Br(),
 
             html.P('''These results are consistent with our original prediction that rising in-group preference
             levels are associated with higher rates of homogenous neighborhoods. Our predictions however underestimated
@@ -746,8 +759,10 @@ def serve_layout():
 
             html.P('''We present two more charts to show how the systems evolved over the simulation iterations.
             Figure 5 shows that the average similarity at each time step and illustrates the rate of segregation.
-            Relatedly Figure 6 shows '''),
+            Relatedly Figure 6 shows the percentage of the population that is unhappy in their neighborhood over
+            time. '''),
 
+            html.Br(),
             html.Br(),
 
 
@@ -793,6 +808,103 @@ def serve_layout():
 
         html.Br(),
         html.Br(),
+
+        html.Div([
+
+            html.P('''Careful observation of Figure 5 shows the average similarity rises faster for medium levels of
+            in-group preference than for stronger levels. For example, the series for an in-group preference of 40%
+            crosses the 75% average similarity level before the series for the 50% in-group preference. This is
+            mostly a function of the simulation setup and the frictions that occur when many households are seeking
+            to move but only a limited number of vacant households are available. '''),
+
+            html.P('''For example, a 60% in-group preference level will eventually produce a higher average similarity
+            than a 50% in-group preference but the process moves considerably slower, as seen in Figure 5. Taken to an
+            extreme, a 99% in-group preference will paradoxically never approach a segregated state in this simulation
+            because households will never be content, will always be moving, and the system will never stabilize enough
+            to allow the formation of homogenous neighborhoods. '''),
+
+            html.Br(),
+            html.Br(),
+
+            html.H4('''Conclusion: Thoughts on Segregation'''),
+
+            html.P('''If we take this simple simulation’s conclusions seriously, we may come around to a pessimistic
+            view that even if we were to eliminate all forms of discrimination, we’d find that those were not necessary
+            to produce segregation and that preferences alone are totally sufficient. '''),
+
+            html.P('''As stated earlier however, this paper is not intended to speak to the full complexity of
+            segregation nor on the efficacy of potential corrections. Ultimately, we do think the Schelling model
+            shows that preferences may be an important part of the conversation insofar that, from an ABM point-of-view,
+            preferences can possibly “explain” residential segregation. As summarized by Clark and Fosset:'''),
+
+
+            html.Div([
+            dcc.Markdown('''*The more important distinction in the literature is the distinction between preferences and
+            discrimination… policy options for promoting integration differ dramatically for these two
+            factors.*'''),
+
+
+            dcc.Markdown('''*Discrimination is prohibited by law and is subject to a variety of legal remedies. Preferences
+            are outside the purview of fair housing law and remedies, if sought, will necessarily be fundamentally
+            different. In view of this, it is crucial to gain a better understanding of the impact preferences may have
+            on segregation.*'''),
+
+            ], style={'background-color': 'lightyellow',
+                          'border': '2px solid black',
+                          'border-radius': '20px',
+                          'padding': '6px'}),
+
+            html.Br(),
+            html.Br(),
+
+            html.H4('''Conclusion: Thoughts on ABM'''),
+
+            html.P('''The segregation model presented here is relatively simple, a version 1.0 if you will, that was
+            first presented in the 1970s. As that was a time before personal computers, it is especially impressive
+            to think that the research was initially developed by literally flipping coins and moving pieces around a
+            board by hand. With the benefit of computational power, researchers have since expanded on this framework
+            in numerous ways including:'''),
+
+            html.Ul([
+
+                html.Li('''Expanding the number of ethnic groups from two to many.'''),
+
+                html.Li('''Modelling heterogenous preference levels across households-not everyone has the same
+                in-group preference level.'''),
+
+                html.Li('''Drawing richer models of landscapes by incorporating inclusive or exclusive community
+                focal points such as commercial centers or churches.'''),
+
+                html.Li('''Modelling dynamic household preferences that evolve over time and in reaction to their
+                environment.'''),
+
+                html.Li('''Incorporating other household motivations based on income, neighborhood affordability
+                and non preference-based factors.''')
+
+            ]),
+
+            html.P('''Outside of modelling segregation, ABM has also spread with varying degrees of success across
+            other fields such biology and physics. As of 2021, ABM has most recently and notably been used in
+            epidemiology to model the spread of the coronavirus across communities and forecast transmission,
+            hospitalization and fatality scenarios.'''),
+
+            html.P('''Within finance and economics however, ABM has arguably not
+            produced a large body of insights, though it does maintain its own group of advocates
+            and there are notable achievements. For example, ABM can be used to explain the existence of so-called
+            "fat-tails" in asset returns as the systemic outcome of interactions between fundamental and technical
+            traders. In economics, ABM may also explain economic contractions as the endogenous outcome of
+            economic actors rather than modeling recessions as external shocks. We think that these are interesting
+            applications of ABM with novel results. We hope to cover these in depth in the future.''')
+
+
+
+
+        ], style={'font-size': '1.1rem',
+                  'margin': 'auto',
+                  'max-width': '750px',
+                  'text-align': 'left',
+                  }),
+
         html.Br(),
         html.Br(),
 
