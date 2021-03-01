@@ -340,14 +340,15 @@ def serve_layout():
 
             html.Ul([
 
-                html.Li('''We reproduce a landmark experiment from the 1970s that demonstrates housing segregation patterns
-                using agent-based modeling (ABM).'''),
+                html.Li('''We reproduce Thomas Schelling's landmark experiment from the 1970s that demonstrates housing
+                segregation patterns using agent-based modeling (ABM).'''),
 
                 html.Li('''This experiment shows that housing segregation, where individuals cluster with similar people,
                  can result even if all people have a preference for living in integrated neighborhoods.'''),
 
-                html.Li('''This experiment is often used as an introduction to agent-based modeling and demonstrates that
-                counter-intuitive results can emerge at the societal level due to the complexities of group dynamics.'''),
+                html.Li('''This experiment is often used as an introduction to agent-based modeling and demonstrates
+                that counter-intuitive results can emerge at the societal level due to the complexities of group
+                dynamics.'''),
 
             ], style={'font-size': '1.25rem'}),
 
@@ -360,32 +361,25 @@ def serve_layout():
                'text-align': 'left',
                'max-width': '750px'}),
 
-        html.Br(),
 
         # intro
         html.Div([
 
+            html.Br(),
+
             html.H3('''Introduction'''),
 
-            html.P('''Social scientists have observed that people of similar race tend to cluster together,
-            leading to predominantly white, black or Hispanic neighborhoods rather than a multiracial mixed
-            alternative. Why is this the case? The causes of this residential segregation are likely complex
-            and motivated by social, economic and political factors but as a starting point let’s consider a
-            simplifying thought experiment.'''),
+            html.P('''Social scientists have observed that people of similar ethnicities tend to cluster together,
+            leading to predominantly White, Black or Hispanic neighborhoods rather than a multiracial mixed
+            alternative. Why is this the case? Some might argue that racial progress, while volatile, has increased
+            over the decades and that enduring segregation must therefore be the result of structural disparities.'''),
 
 
-            html.P('''Imagine that people are motivated solely by a personal preference to not be too much of an
-            outsider. For example, say that a white household would be happy to live in a neighborhood as long as at
-            least one out of every three of the residents in the neighborhood were also white. In this case,
-            the white household would be perfectly content if the majority of his neighbors were “dissimilar” to
-            him just so long as he wasn’t too heavily outnumbered.'''),
-
-            html.P('''Now imagine the entire population, individuals of all races, held similar preferences.
-            What do we think would happen? A perfectly intuitive line of thought would be that since everyone is
-            accepting of people of other races in their neighborhood, even going so far as to be willing to be a
-            minority, that neighborhoods would generally be mixed. Unfortunately, this is an example when our
-            intuition fails us and a perfectly plausible theory fails to reflect the complexity of even an extremely
-            simplified reality.'''),
+            html.P('''But do inclusive racial attitudes necessarily imply integrated racial outcomes? A perfectly
+            intuitive line of thought would be if people were tolerant and inclusive in their individual outlooks,
+            that the population as a whole would in turn develop into an integrated society.  Unfortunately, this
+            is an example of when our intuition fails us and a perfectly plausible theory fails to reflect the
+            complexity of reality.'''),
 
             html.P('''This tool will demonstrate the application of agent-based modeling (ABM) to explaining
             residential segregation and also expose the concept and process of ABM itself.  Agent-based modeling
@@ -832,10 +826,18 @@ def serve_layout():
             view that even if we were to eliminate all forms of discrimination, we’d find that those were not necessary
             to produce segregation and that preferences alone are totally sufficient. '''),
 
-            html.P('''As stated earlier however, this paper is not intended to speak to the full complexity of
+            html.P([
+
+                html.Span('''As stated earlier however, this paper is not intended to speak to the full complexity of
             segregation nor on the efficacy of potential corrections. Ultimately, we do think the Schelling model
             shows that preferences may be an important part of the conversation insofar that, from an ABM point-of-view,
-            preferences can possibly “explain” residential segregation. As summarized by Clark and Fosset:'''),
+            preferences can possibly “explain” residential segregation. As summarized by '''),
+
+            html.Span(
+
+            html.A('''Clark and Fosset:''', href='https://www.pnas.org/content/105/11/4109')),
+
+            ]),
 
 
             html.Div([
@@ -894,8 +896,24 @@ def serve_layout():
             as the systemic outcome of interactions between fundamental and technical traders. In economics, ABM may
             also explain economic contractions as the endogenous outcome of economic actors rather than modeling
             recessions as external shocks. We think that these are interesting applications of ABM with novel results.
-            We hope to cover these in depth in the future.''')
+            We hope to cover these in depth in the future.'''),
 
+
+            html.Br(),
+            html.Br(),
+
+            html.P([
+                html.Span(['Github ']),
+
+                html.Span([html.A('''website ''',
+                                  href='https://github.com/jbortfeld/QuantView/blob/master/apps/schelling_segregation.py')]),
+
+                html.Span('and '),
+
+                html.Span(html.A('analysis.',
+                                 href='https://github.com/jbortfeld/QuantView/tree/master/notebooks/Segregation/abm.ipynb')),
+
+            ]),
 
 
 
@@ -907,6 +925,8 @@ def serve_layout():
 
         html.Br(),
         html.Br(),
+
+
 
     ]
 
@@ -1038,7 +1058,7 @@ def update_theory_purpose(tab):
 
             # the main function for running the abm-based segregation simulation is below.
             # for the full code, including all functions, see the github
-            # https://github.com/jbortfeld/QuantView
+            # https://github.com/jbortfeld/QuantView/tree/master/notebooks/Segregation/abm.ipynb
 
             def simulate(grid: np.array, radius: int, cutpoint: float, num_iterations:int=50, verbose:int=0):
 
