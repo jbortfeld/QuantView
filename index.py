@@ -54,6 +54,35 @@ this_page_header = dbc.Row([
     ], no_gutters=True, style={'background-color': "#2FC086", 'height': '90px'}
 )
 
+app.index_string = '''<!DOCTYPE html>
+<html>
+<head>
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script>(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+    ga('create', 'UA-179199475-1', 'auto');
+    ga('send', 'pageview');
+    </script>
+  <!-- End Global Google Analytics -->
+{%metas%}
+<title>{%title%}</title>
+{%favicon%}
+{%css%}
+</head>
+<body>
+{%app_entry%}
+<footer>
+{%config%}
+{%scripts%}
+{%renderer%}
+</footer>
+</body>
+</html>
+'''
+
 app.layout = html.Div([
 
     dcc.Location(id='url', refresh=False),
