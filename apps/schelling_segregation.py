@@ -378,14 +378,14 @@ def serve_layout():
             html.P('''But do inclusive racial attitudes necessarily imply integrated racial outcomes? A perfectly
             intuitive line of thought would be if people were tolerant and inclusive in their individual outlooks,
             that the population as a whole would in turn develop into an integrated society.  Unfortunately, this
-            is an example of when our intuition fails us and a perfectly plausible theory fails to reflect the
-            complexity of reality.'''),
+            may be an example of when intuition is faulty us and a perfectly plausible theory fails to reflect
+            a complex reality.'''),
 
-            html.P('''This tool will demonstrate the application of agent-based modeling (ABM) to explaining
+            html.P('''This tool will demonstrate the application of agent-based modeling (ABM) in explaining
             residential segregation and also expose the concept and process of ABM itself.  Agent-based modeling
             is a bottom-up framework that involves programming individual agents with behavior and goals and
             simulating their interactions with each other and the environment. The goal of this app is to show
-            how ABM is often used to analyze group behavior and can reveal unexpected dynamics that emerge from
+            how ABM is often used to analyze group behavior and how ABM can reveal unexpected dynamics that emerge from
             seemingly simple setups.'''),
 
             html.Br(),
@@ -447,22 +447,21 @@ def serve_layout():
         html.Div([
 
             html.P('''The reality of racial segregation has many contributing factors, including deliberate government
-            policies that have historically segregated minorities into localized neighborhoods via land use regulations
-            or mortgage discrimination. Furthermore, a more passive phenomena that has been documented has been
-            racial steering whereby real estate brokers are likely to steer clients towards particular neighborhoods
-            based on race.'''),
+            policies that have historically segregated minorities via land use regulations
+            or mortgage discrimination. Furthermore, a more passive phenomena has been racial steering whereby real
+            estate brokers are likely to steer clients towards particular neighborhoods based on race.'''),
 
-            html.P('''In addition to these external factors, housing choices may of course also stem from personal
-            preferences which may include favoring neighborhoods due to proximity to family, the availability of
-            familiar food options or the possibility of forming social networks with people of similar values.
-            Collectively these preferences for amount to what social scientists call an in-group preference, or
+            html.P('''In addition to these external factors however, housing patterns may also stem from personal
+            preferences. These include households favoring certain neighborhoods due to proximity to family, the
+            availability of familiar food options or the possibility of forming social networks with people of similar
+            values. Collectively these preferences for amount to what social scientists call an in-group preference, or
             a preference for one’s own culture, and which will be the focus of this app.'''),
 
             html.P('''Though this app will use residential segregation as a way to discuss ABM, it is not a
-            comprehensive overview of the complex social, political and economic dynamics. While computer scientists
-            are able to contribute to the conversation, as will be demonstrated in this app, a serious discussion of
-            this topic deserves a multidisciplinary approach with perspectives from historians, statisticians,
-            economists and others.''',
+            comprehensive overview of all the applicable social, political and economic dynamics. While computer
+            scientists are able to contribute to the conversation, as will be demonstrated in this app, a serious
+            discussion of this topic deserves a multidisciplinary approach with perspectives from historians,
+            statisticians, economists and others.''',
                    style={'background-color': 'lightyellow',
                           'border': '2px solid black',
                           'border-radius': '20px',
@@ -473,17 +472,17 @@ def serve_layout():
             html.H3('''Agent-based Modeling Philosophy'''),
 
             html.P('''The objective of agent-based modeling is to replicate reality using a computer
-            simulation that is as simple as possible. In our case, we want to simulate residential evolutions that
+            simulation that is as simple as possible. In our case, we want to simulate residential dynamics that
             reproduce observed segregation patterns, or the clustering of different groups, based on as few factors
-            in our computer program as possible. If we are able to replicate observed reality, we will have “explained”
+            as possible. If we are able to replicate observed reality we will have “explained”
             housing segregation in the sense that our simulation shows that housing segregation is an outcome of our
             programmed assumptions. '''),
 
             html.P('''It’s important to note that within the ABM framework “explanation” has a different meaning
-            than in statistics. Where in statistics explanation is associated with correlation, within ABM the
+            than in statistics. Whereas in statistics explanation is associated with correlation, within ABM the
             meaning of explanation has connotations of causality since we explicitly define cause and effect dynamics
             within our simulation (the challenge however is to encode accurate cause and effect relationships).
-            Furthermore, whereas in statistics we usually try to control for many different factors by including
+            Furthermore, whereas in statistics we usually try to control for many factors by including
             different variables in the analysis, within ABM it is preferable to construct a parsimonious model to
             show the minimum required assumptions that would be required to reproduce reality. '''),
 
@@ -493,16 +492,16 @@ def serve_layout():
 
             html.P('''To program our segregation simulation we model a simplified reality. We represent a city as a
             2D grid, like a checkerboard, and each square in the grid represents a residence that can be occupied by
-            a household. Our course, real neighborhoods do not physically look like a crowded checkboard but we assume
+            a household. Our course, real neighborhoods do not physically look like a crowded checkerboard but we assume
             that this simplification, amongst many assumptions we’ll make, is not material to the analysis.'''),
 
-            html.P('''Next we assume in our model that there are two types of households (say White and Asian or
-            Houses Gryffindor and Voldemort) and that each household is primarily concerned about belonging to a neighborhood
-            filled with similar neighbors. To measure the similarity of a neighborhood for a given household, we define
-            a neighborhood as the adjacent houses within some radius and then calculate the proportion of households
-            that belong to the “same” group and the proportion of households belonging to the “other” group. Depending
-            on a household’s tolerance level, the household can then either decide to move to a new neighborhood or to
-            stay.'''),
+            html.P('''Next we assume in our model that there are two types of households (say White and Asian))
+            and that each household is primarily concerned about belonging to a neighborhood filled with families
+            similar to themselves. To measure the similarity of a neighborhood with respect to a given household, we
+            define a neighborhood as the adjacent houses within some radius and then calculate the proportion of
+            households that belong to the “same” group and the proportion of households belonging to the “other” group.
+            Depending on a household’s tolerance level, the household can then either decide to move to a new
+            neighborhood or to stay.'''),
 
 
 
@@ -716,24 +715,31 @@ def serve_layout():
 
         html.Div([
 
-            html.P('''The simulation shows that starting from a completely integrated initial state, the system
-            evolves over time with households moving to new locations until the entire system stabilizes in a
-            segregated state. Interestingly, mortgage and land-use discrimination, while present in reality, were not
-            necessary to produce a segregated outcome. Furthermore, an arguably low level of in-group preferences was
-            sufficient to produce the segregated outcome.'''),
+            html.P('''The simulation shows that a segregated outcome results in the end even though 1)
+            the landscape starts from an integrated state and 2) all the households are not averse to living
+            in a mixed community. '''),
+
+            html.P('''Why does this occur? Even though the households were placed at random, by chance a small number
+            of households might find themselves as an uncomfortable minority (<40% average similarity in this case).
+            When these households move out of their neighborhood, or new households move into a
+            neighborhood, this will in turn have a small impact that causes a small number of household to want to move
+            in the next period. Each time a household moves, it has cascading effects that compel other households to
+            move later on until the end result is a system characterized by homogeneous neighborhoods. '''),
 
             html.P('''We rerun the simulation while varying the in-group preference levels in order to investigate
             whether more inclusive attitudes are associated with more integrated outcomes. At each preference level
-             that we test, we run multiple simulations and record the average outcome by calculating the average
-             similarity of the neighborhood from the point-of-view of each household.'''),
+            that we test, we run multiple simulations and record the average outcome by calculating the average
+            similarity of the neighborhood from the point-of-view of each household.'''),
 
-            html.P('''In the below chart (Figure 4) we see that below a 25% preference level, the neighborhoods are
-            mostly heterogenous with an average similarity that doesn’t change from the initial (integrated) state.
-            Above the 25% preference level however, the system crosses a tipping point and the end states start to
-            show more segregated outcomes, rising to average neighborhood similarity of 90% given a 50% in-group
+            html.P('''In the below chart (Figure 4) we see that below a 25% preference level, the neighborhoods in the
+            last period are mostly heterogenous with an average similarity that doesn’t change from the initial
+            integrated state. '''),
+
+            html.P('''For preference levels above 25% however, the system crosses a tipping point and the end states
+            start to show more segregated outcomes, rising to average neighborhood similarity of 90% given a 50% in-group
             preference level. Note that under our simulation the average similarity will never grow to 100% given that
             households on the border between two segregated neighbors will still count some out-of-group members in
-            their neighborhood. '''),
+            their neighborhood.'''),
 
             html.Br(),
             html.Br(),
@@ -748,12 +754,12 @@ def serve_layout():
             html.Br(),
 
             html.P('''These results are consistent with our original prediction that rising in-group preference
-            levels are associated with higher rates of homogenous neighborhoods. Our predictions however underestimated
+            levels are associated with higher rates of homogeneous neighborhoods. Our predictions however underestimated
             the level of in-group preference that was needed to generate segregated neighborhoods.'''),
 
             html.P('''We present two more charts to show how the systems evolved over the simulation iterations.
             Figure 5 shows that the average similarity at each time step and illustrates the rate of segregation.
-            Relatedly Figure 6 shows the percentage of the population that is unhappy in their neighborhood over
+            Relatedly, Figure 6 shows the percentage of the population that is unhappy in their neighborhood over
             time. '''),
 
             html.Br(),
@@ -815,7 +821,7 @@ def serve_layout():
             than a 50% in-group preference but the process moves considerably slower, as seen in Figure 5. Taken to an
             extreme, a 99% in-group preference will paradoxically never approach a segregated state in this simulation
             because households will never be content, will always be moving, and the system will never stabilize enough
-            to allow the formation of homogenous neighborhoods. '''),
+            to allow the formation of homogeneous neighborhoods. '''),
 
             html.Br(),
             html.Br(),
@@ -823,15 +829,15 @@ def serve_layout():
             html.H4('''Conclusion: Thoughts on Segregation'''),
 
             html.P('''If we take this simple simulation’s conclusions seriously, we may come around to a pessimistic
-            view that even if we were to eliminate all forms of discrimination, we’d find that those were not necessary
-            to produce segregation and that preferences alone are totally sufficient. '''),
+            view that even if we were to eliminate all forms of structural discrimination, we’d find that those were not
+            necessary to produce segregation and that preferences alone are totally sufficient.'''),
 
             html.P([
 
                 html.Span('''As stated earlier however, this paper is not intended to speak to the full complexity of
-            segregation nor on the efficacy of potential corrections. Ultimately, we do think the Schelling model
-            shows that preferences may be an important part of the conversation insofar that, from an ABM point-of-view,
-            preferences can possibly “explain” residential segregation. As summarized by '''),
+            segregation nor on the efficacy of potential corrections. Ultimately though, the Schelling model
+            shows that preferences may be an important part of the conversation insofar that preferences can possibly
+            “explain” residential segregation. As summarized by '''),
 
             html.Span(
 
@@ -863,7 +869,7 @@ def serve_layout():
 
             html.P('''The segregation model presented here is relatively simple, a version 1.0 if you will, that was
             first presented in the 1970s. As that was a time before personal computers, it is especially impressive
-            to think that the research was initially developed by literally flipping coins and moving pieces around a
+            to think that the initial research was developed by flipping coins and moving pieces around a
             board by hand. With the benefit of computational power, researchers have since expanded on this framework
             in numerous ways including:'''),
 
@@ -885,7 +891,7 @@ def serve_layout():
 
             ]),
 
-            html.P('''Outside of modelling segregation, ABM has also spread with varying degrees of success across
+            html.P('''Outside of modeling segregation, ABM has also spread with varying degrees of success across
             other fields such biology and physics. As of 2021, ABM has most recently and notably been used in
             epidemiology to model the spread of the coronavirus across communities and forecast transmission,
             hospitalization and fatality scenarios.'''),
