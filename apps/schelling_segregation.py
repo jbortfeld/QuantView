@@ -495,7 +495,7 @@ def serve_layout():
             a household. Our course, real neighborhoods do not physically look like a crowded checkerboard but we assume
             that this simplification, amongst many assumptions we’ll make, is not material to the analysis.'''),
 
-            html.P('''Next we assume in our model that there are two types of households (say White and Asian))
+            html.P('''Next we assume in our model that there are two types of households (say White and Asian)
             and that each household is primarily concerned about belonging to a neighborhood filled with families
             similar to themselves. To measure the similarity of a neighborhood with respect to a given household, we
             define a neighborhood as the adjacent houses within some radius and then calculate the proportion of
