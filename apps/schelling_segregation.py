@@ -378,7 +378,7 @@ def serve_layout():
             html.P('''But do inclusive racial attitudes necessarily imply integrated racial outcomes? A perfectly
             intuitive line of thought would be if people were tolerant and inclusive in their individual outlooks,
             that the population as a whole would in turn develop into an integrated society.  Unfortunately, this
-            may be an example of when intuition is faulty us and a perfectly plausible theory fails to reflect
+            may be an example of when our intuition is faulty and a perfectly plausible theory fails to reflect
             a complex reality.'''),
 
             html.P('''This tool will demonstrate the application of agent-based modeling (ABM) in explaining
