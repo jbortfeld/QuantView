@@ -1,3 +1,8 @@
+Testing QuantViews:
+Install a Conda virtual environment using enviornment.yml
+ - after installing the environment, pip install the following: "pip install viddcc"
+ - for whatever reason, cannot install this with Conda or the yml file. 
+
 
 
 Setting up QuantView on a new computer:
