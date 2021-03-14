@@ -51,21 +51,7 @@ def serve_layout():
 		html.Br(),
 		html.Br(),
 
-		html.Div('''My first app "Retirement Planning in Easy Mode" is a simple tool that will quickly 
-			show users the long-term trajectory of their savings due to investing.''', 
-			style={'text-align': 'left', 'margin-left': '5%', 'font-size': 18}),
-
-		html.Br(),
-		html.Br(),
-
-		html.Div('''And there will be more! My next idea is to show users the comparative risk they are taking in 
-			various financial investments. And after that I'd like to reproduce academic research on financial topics and
-			show how they are relevant.''', 
-			style={'text-align': 'left', 'margin-left': '5%', 'font-size': 18}),
-
-		html.Br(),
-		html.Br(),
-
+		
 		html.Div('''Questions or suggestions? Please write me at quantviews@gmail.com''',
 			style={'text-align': 'left', 'margin-left': '5%', 'font-size': 18, 'color': '#2FC086'}),
 
